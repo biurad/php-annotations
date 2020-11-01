@@ -1,9 +1,8 @@
 {
-    "name": "biurad/php-starter",
-    "description": "A PHP package template repository.",
     "name": "biurad/annotations",
+    "description": "A library that provides a Simple, Lazy, Fast & Lightweight Annotation for php classes",
     "type": "library",
-    "keywords": ["biurad","biuradphp","php7"],
+    "keywords": ["biurad","biurad","php","annotations","phpdoc"],
     "homepage": "https://www.biurad.com",
     "license": "BSD-3-Clause",
     "authors": [
@@ -23,7 +22,9 @@
         "source": "https://github.com/biurad/php-annotations"
     },
     "require": {
-        "php": "^7.1 || ^8.0"
+        "php": "^7.2 || ^8.0",
+        "doctrine/annotations": "^1.11",
+        "symfony/polyfill-php80": "^1.20"
     },
     "require-dev": {
         "composer/package-versions-deprecated": "^1.8",
@@ -35,12 +36,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Biurad\\Package\\": "src/"
+            "Biurad\\Annotations\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Biurad\\Package\\Tests\\": "tests/"
+            "Biurad\\Annotations\\Tests\\": "tests/"
         }
     },
     "scripts": {
