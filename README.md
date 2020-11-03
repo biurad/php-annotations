@@ -1,4 +1,4 @@
-# The Biurad PHP Library Template
+# The Biurad PHP Annotations
 
 [![Latest Version](https://img.shields.io/packagist/v/biurad/annotations.svg?style=flat-square)](https://packagist.org/packages/biurad/annotations)
 [![Software License](https://img.shields.io/badge/License-BSD--3-brightgreen.svg?style=flat-square)](LICENSE)
@@ -8,19 +8,41 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/biurad/php-annotations.svg?style=flat-square)](https://scrutinizer-ci.com/g/biurad/php-annotations)
 [![Sponsor development of this project](https://img.shields.io/badge/sponsor%20this%20package-%E2%9D%A4-ff69b4.svg?style=flat-square)](https://biurad.com/sponsor)
 
-**biurad/php-annotations** is a php library template repository for biurad lap. To use this library, rename **php-starter** and **BSD-3** on every file that contain it to your preferred library name and license.
-
-As to why this project exist, it's to serve as a template for future open source PHP library projects. Of course, feel free to fork it and make your own recipe.
+**biurad/php-annotations** is an annotations and attribute reader for [PHP] 7.2+ created by [Divine Niiquaye][@divineniiquaye]. This library provides a Simple, Lazy, Fast & Lightweight [Doctrine Annotations][doctrine] and PHP 8 Attribute reader for your project.
 
 ## 📦 Installation & Basic Usage
 
-This project requires [PHP] 7.1 or higher. The recommended way to install, is via [Composer]. Simply run:
+This project requires [PHP] 7.2 or higher. The recommended way to install, is via [Composer]. Simply run:
 
 ```bash
-$ composer require biurad/php-annotations
+$ composer require biurad/annotations
 ```
 
-Write a bit of **How To** use this package, so developers can have a bit of idea about the repository before checking out documentation.
+We all know writing annotations support for a project takes alot of time, work and sometimes end up changing the whole code to suite the current changes of [PHP], example of project that has messy annotations is [Nette DI][nette-di]. In short, this library is meant to be a base building block that utilizes [Doctrine Annotations][doctrine] and attributes introduced in [PHP] 8.
+
+Let's you working on a few projects and you need to annotation support for each. With this library we make your work easier,all you need is a instance of `Biurad\Annotations\ListenerInterface` and an annotated class for finding annotations or attributes.
+
+**To know more about how to use this library, try going through the `tests` directory and find out how to integrate this library into your project.**
+
+example of usage:
+
+```php
+use Biurad\Annotations\AnnotationLoader;
+use Doctrine\Common\Annotations\AnnotationReader;
+
+$annotation = new AnnotationLoader(new AnnotationReader());
+
+$annotation->attachListener(...); // Add your implemented Annotation listeners
+
+$annotation->attach(...); // Add a class string, classless file, or directory
+
+$listeners = \iterator_to_array($annotation->load());
+
+// To use a collector you implemented into your instance of `Biurad\Annotations\ListenerInterface`
+foreach ($$listeners as $collector) {
+    // You can fetch the required $collector from here.
+}
+```
 
 ## 📓 Documentation
 
@@ -100,3 +122,5 @@ Check out the other cool things people are doing with `biurad/php-annotations`: 
 [Biurad Lap]: https://team.biurad.com
 [email]: support@biurad.com
 [message]: https://projects.biurad.com/message
+[doctrine]: https://github.com/doctrine/annotations
+[nette-di]: https://github.com/nette/di
