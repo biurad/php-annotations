@@ -18,9 +18,13 @@
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
+    <coverage>
+        <include>
+            <directory>src</directory>
+        </include>
+
+        <exclude>
+            <directory>src/DependecyInjection</directory>
+        </exclude>
+    </coverage>
 </phpunit>
