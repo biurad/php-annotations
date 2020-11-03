@@ -4,3 +4,18 @@ includes:
 parameters:
     level: max
     paths: [src]
+    checkGenericClassInNonGenericObjectType: false
+
+    excludes_analyse:
+        - src/DependencyInjection/*
+
+    ignoreErrors:
+        -
+            message: "#^Parameter \\#1 \\$argument of class ReflectionClass constructor expects class-string<T of object>\\|T of object, string given.$#"
+            path: src/AnnotationLoader.php
+        -
+           message: "#^Call to an undefined method ReflectionClass\\|ReflectionMethod\\|ReflectionProperty\\:\\:getAttributes\\(\\).$#"
+           path: src/AnnotationLoader.php
+        -
+           message: "#^Instanceof between ReflectionProperty and ReflectionProperty will always evaluate to true.$#"
+           path: src/AnnotationLoader.php
