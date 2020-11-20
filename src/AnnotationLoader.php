@@ -17,20 +17,21 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations;
 
-use Doctrine\Common\Annotations\Reader as AnnotationReader;
-use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
+use ReflectionClassConstant;
 use ReflectionMethod;
+use ReflectionParameter;
 use ReflectionProperty;
 use Reflector;
 use RegexIterator;
+use Spiral\Attributes\ReaderInterface;
 
 class AnnotationLoader implements LoaderInterface
 {
-    /** @var null|AnnotationReader */
+    /** @var ReaderInterface */
     private $annotation;
 
     /** @var ListenerInterface[] */
@@ -40,15 +41,11 @@ class AnnotationLoader implements LoaderInterface
     private $resources = [];
 
     /**
-     * @param null|AnnotationReader $reader
+     * @param ReaderInterface $reader
      */
-    public function __construct(?AnnotationReader $reader = null)
+    public function __construct(ReaderInterface $reader)
     {
         $this->annotation = $reader;
-
-        if (null === $reader && \interface_exists(AnnotationReader::class)) {
-            $this->annotation = new SimpleAnnotationReader();
-        }
     }
 
     /**
@@ -57,10 +54,6 @@ class AnnotationLoader implements LoaderInterface
     public function attachListener(ListenerInterface ...$listeners): void
     {
         foreach ($listeners as $listener) {
-            if ($this->annotation instanceof SimpleAnnotationReader) {
-                $this->annotation->addNamespace($listener->getAnnotation());
-            }
-
             $this->listeners[] = $listener;
         }
     }
@@ -89,15 +82,9 @@ class AnnotationLoader implements LoaderInterface
 
                     continue;
                 }
-
-                if (!\file_exists($resource) || \is_dir($resource)) {
-                    continue;
-                }
-
-                (function () use ($resource): void {
-                    require $resource;
-                })->call($listener->getBinding());
             }
+
+            //TODO: Read annotations from functions ...
         }
 
         foreach ($this->listeners as $listener) {
@@ -110,7 +97,8 @@ class AnnotationLoader implements LoaderInterface
     /**
      * Finds annotations in the given resource
      *
-     * @param string $resource
+     * @param string            $resource
+     * @param ListenerInterface $listener
      *
      * @return array<string,array<string,mixed>>
      */
@@ -139,7 +127,12 @@ class AnnotationLoader implements LoaderInterface
                 $annotations[$className]['class'] = $annotation;
             }
 
-            $reflections = \array_merge($classReflection->getMethods(), $classReflection->getProperties());
+            // Reflections belonging to class object.
+            $reflections = \array_merge(
+                $classReflection->getMethods(),
+                $classReflection->getProperties(),
+                $classReflection->getConstants()
+            );
 
             foreach ($reflections as $reflection) {
                 if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
@@ -149,6 +142,16 @@ class AnnotationLoader implements LoaderInterface
                 foreach ($this->getAnnotations($reflection, $listener) as $annotation) {
                     if ($reflection instanceof ReflectionMethod) {
                         $annotations[$className]['method'][] = [$reflection, $annotation];
+
+                        foreach ($this->getMethodParameter($reflection->getParameters(), $listener) as $parameter) {
+                            $annotations[$className]['method_property'][] = $parameter;
+                        }
+
+                        continue;
+                    }
+
+                    if ($reflection instanceof ReflectionClassConstant) {
+                        $annotations[$className]['constant'][] = [$reflection, $annotation];
 
                         continue;
                     }
@@ -164,7 +167,7 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     * @param ReflectionClass|ReflectionMethod|ReflectionProperty $reflection
+     * @param Reflector $reflection
      *
      * @return iterable<object>
      */
@@ -173,36 +176,53 @@ class AnnotationLoader implements LoaderInterface
         $annotationClass = $listener->getAnnotation();
         $annotations     = [];
 
-        if (\PHP_VERSION_ID >= 80000) {
-            foreach ($reflection->getAttributes($annotationClass) as $attribute) {
-                yield $attribute->newInstance();
-            }
-        }
-
-        if (null === $this->annotation) {
-            return;
-        }
-
         switch (true) {
             case $reflection instanceof ReflectionClass:
-                $annotations = $this->annotation->getClassAnnotations($reflection);
+                $annotations = $this->annotation->getClassMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionMethod:
-                $annotations = $this->annotation->getMethodAnnotations($reflection);
+                $annotations = $this->annotation->getFunctionMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionProperty:
-                $annotations = $this->annotation->getPropertyAnnotations($reflection);
+                $annotations = $this->annotation->getPropertyMetadata($reflection);
 
                 break;
+
+            case $reflection instanceof ReflectionClassConstant:
+                $annotations = $this->annotation->getConstantMetadata($reflection);
+
+                break;
+
+            case $reflection instanceof ReflectionParameter:
+                $annotations = $this->annotation->getParameterMetadata($reflection);
         }
 
         foreach ($annotations as $annotation) {
             if ($annotation instanceof $annotationClass) {
                 yield $annotation;
+            }
+        }
+    }
+
+    /**
+     * @param array $parameters
+     * @param ListenerInterface $listener
+     *
+     * @return iterable<object>
+     */
+    private function getMethodParameter(array $parameters, ListenerInterface $listener): iterable
+    {
+        foreach ($listener->getArguments() as $name) {
+            foreach ($parameters as $parameter) {
+                if ($parameter->getName() === $name) {
+                    foreach ($this->getAnnotations($parameter, $listener) as $annotation) {
+                        yield [$parameter, $annotation];
+                    }
+                }
             }
         }
     }

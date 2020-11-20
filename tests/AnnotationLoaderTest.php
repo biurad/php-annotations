@@ -18,11 +18,12 @@ declare(strict_types=1);
 namespace Biurad\Annotations\Tests;
 
 use Biurad\Annotations\AnnotationLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
+use Spiral\Attributes\AnnotationReader;
+use Spiral\Attributes\NativeAttributeReader;
 
 /**
  * AnnotationLoaderTest
@@ -31,7 +32,10 @@ class AnnotationLoaderTest extends TestCase
 {
     protected function setUp(): void
     {
-        AnnotationRegistry::registerLoader('class_exists');
+        // doctrine/annotations ^1.0 compatibility.
+        if (\method_exists(AnnotationRegistry::class, 'registerLoader')) {
+            AnnotationRegistry::registerLoader('\\class_exists');
+        }
     }
 
     /**
@@ -102,7 +106,7 @@ class AnnotationLoaderTest extends TestCase
      */
     public function testAttachAttribute(): void
     {
-        $annotation = new AnnotationLoader(new AnnotationReader());
+        $annotation = new AnnotationLoader(new NativeAttributeReader());
         $result     = [];
 
         $annotation->attachListener(new Fixtures\SampleListener());

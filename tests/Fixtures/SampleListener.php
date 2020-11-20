@@ -35,9 +35,9 @@ class SampleListener implements ListenerInterface
     /**
      * {@inheritdoc}
      */
-    public function getBinding(): object
+    public function getArguments(): array
     {
-        return $this->collector;
+        return ['parameter'];
     }
 
     /**

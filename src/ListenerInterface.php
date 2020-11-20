@@ -36,10 +36,10 @@ interface ListenerInterface
     public function getAnnotation(): string;
 
     /**
-     * Add a binding, so we can load from php files
-     * which are not class type.
+     * This methods gets the annotation from a function or method's
+     * paramater.
      *
-     * @return object
+     * @return string[]
      */
-    public function getBinding(): object;
+    public function getArguments(): array;
 }

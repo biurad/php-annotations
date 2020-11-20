@@ -23,11 +23,12 @@
     },
     "require": {
         "php": "^7.2 || ^8.0",
-        "doctrine/annotations": "^1.11",
+        "spiral/attributes": "dev-master",
         "symfony/polyfill-php80": "^1.20"
     },
     "require-dev": {
         "composer/package-versions-deprecated": "^1.8",
+        "doctrine/annotations": "^1.11",
         "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-strict-rules": "^0.12",
         "phpunit/phpunit": "^8.5 || ^9.0",
@@ -55,6 +56,9 @@
             "@psalm",
             "@phpunit"
         ]
+    },
+    "suggest": {
+        "doctrine/annotations": "^1.0 for Doctrine metadata driver support"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
