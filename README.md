@@ -20,7 +20,7 @@ $ composer require biurad/annotations
 
 We all know writing annotations support for a project takes alot of time, work and sometimes end up changing the whole code to suite the current changes of [PHP], example of project that has messy annotations is [Nette DI][nette-di]. In short, this library is meant to be a base building block that utilizes [Doctrine Annotations][doctrine] and attributes introduced in [PHP] 8.
 
-Let's you working on a few projects and you need to annotation support for each. With this library we make your work easier,all you need is a instance of `Biurad\Annotations\ListenerInterface` and an annotated class for finding annotations or attributes.
+Let's say you working on a few projects and you need annotations support for each. With this library we make your work easier, all you need is a instance of `Biurad\Annotations\ListenerInterface` and an annotated class for finding annotations or attributes.
 
 **To know more about how to use this library, try going through the `tests` directory and find out how to integrate this library into your project.**
 
@@ -28,9 +28,18 @@ example of usage:
 
 ```php
 use Biurad\Annotations\AnnotationLoader;
-use Doctrine\Common\Annotations\AnnotationReader;
+use Spiral\Attributes\AnnotationReader;
+use Spiral\Attributes\AttributeReader;
+use Spiral\Attributes\Composite\MergeReader;
 
-$annotation = new AnnotationLoader(new AnnotationReader());
+// The doctrine annotation reader
+$doctrine = new AnnotationReader();
+
+// With spiral/attributes library, we can use PHP 8 attributes in PHP 7.2 +
+$attribute = new AttributeReader();
+
+// Create a new annotation loader from readers ...
+$annotation = new AnnotationLoader(new MergeReader([$doctrine, $attribute]));
 
 $annotation->attachListener(...); // Add your implemented Annotation listeners
 
