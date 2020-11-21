@@ -6,16 +6,7 @@ parameters:
     paths: [src]
     checkGenericClassInNonGenericObjectType: false
 
-    excludes_analyse:
-        - src/DependencyInjection/*
-
     ignoreErrors:
         -
-            message: "#^Parameter \\#1 \\$argument of class ReflectionClass constructor expects class-string<T of object>\\|T of object, string given.$#"
-            path: src/AnnotationLoader.php
-        -
-           message: "#^Call to an undefined method ReflectionClass\\|ReflectionMethod\\|ReflectionProperty\\:\\:getAttributes\\(\\).$#"
-           path: src/AnnotationLoader.php
-        -
-           message: "#^Instanceof between ReflectionProperty and ReflectionProperty will always evaluate to true.$#"
+           message: "#^Unable to resolve the template type T in call to method Spiral\\\\Attributes\\\\ReaderInterface\\:\\:(getParameterMetadata\\(\\)|getFunctionMetadata\\(\\)|getClassMetadata\\(\\)|getPropertyMetadata\\(\\)|getConstantMetadata\\(\\))$#"
            path: src/AnnotationLoader.php

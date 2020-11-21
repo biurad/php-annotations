@@ -17,21 +17,10 @@
         <directory name="src"/>
         <ignoreFiles>
             <directory name="vendor"/>
-            <directory name="src/DependencyInjection"/>
         </ignoreFiles>
     </projectFiles>
 
-    <issueHandlers>
-        <UndefinedMethod>
-            <errorLevel type="suppress">
-                <referencedMethod name="ReflectionClass::getAttributes" />
-            </errorLevel>
-        </UndefinedMethod>
-
-        <ArgumentTypeCoercion>
-            <errorLevel type="suppress">
-                <referencedFunction name="ReflectionClass::__construct" />
-            </errorLevel>
-        </ArgumentTypeCoercion>
-    </issueHandlers>
+    <stubs>
+        <file name="vendor/vimeo/psalm/stubs/Php80.php" />
+    </stubs>
 </psalm>

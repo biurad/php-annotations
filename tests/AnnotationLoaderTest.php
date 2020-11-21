@@ -67,6 +67,9 @@ class AnnotationLoaderTest extends TestCase
             }
         }
 
+        asort($names);
+        asort($result);
+
         $this->assertEquals([
             'default',
             'protected_property',

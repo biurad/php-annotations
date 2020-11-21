@@ -112,6 +112,7 @@ class AnnotationLoader implements LoaderInterface
             $classes[] = $resource;
         }
 
+        /** @var class-string $class */
         foreach ($classes as $class) {
             $classReflection = new ReflectionClass($class);
             $className       = $classReflection->getName();
@@ -167,6 +168,7 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
+     *
      * @param Reflector $reflection
      *
      * @return iterable<object>
@@ -209,10 +211,10 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     * @param array $parameters
-     * @param ListenerInterface $listener
+     * @param ReflectionParameter[] $parameters
+     * @param ListenerInterface     $listener
      *
-     * @return iterable<object>
+     * @return iterable<int,object[]>
      */
     private function getMethodParameter(array $parameters, ListenerInterface $listener): iterable
     {
