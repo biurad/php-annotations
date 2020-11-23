@@ -23,6 +23,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 use Spiral\Attributes\AnnotationReader;
+use Spiral\Attributes\FallbackAttributeReader;
 use Spiral\Attributes\NativeAttributeReader;
 
 /**
@@ -54,51 +55,48 @@ class AnnotationLoaderTest extends TestCase
 
         $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
 
+        /** @var Fixtures\SampleCollector $found */
         foreach ($founds as $found) {
             $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
 
-            foreach ($found->getCollected() as $name => $sample) {
-                if (\is_object($sample['handler'])) {
-                    $sample['handler'] = \get_class($sample['handler']);
-                }
+            $collected = $found->getCollected();
+            $collected->ksort();
 
+            foreach ($collected as $name => $sample) {
                 $names[]  = $name;
                 $result[] = $sample;
             }
         }
 
-        asort($names);
-        asort($result);
-
         $this->assertEquals([
             'default',
-            'protected_property',
-            'private_property',
-            'mtp_start',
-            'mtp_end',
-            'mtp_next',
-            'priority',
-            'private',
-            'protected',
-            'public_property',
+            'global_property',
             'global_specific_name',
             'global_specific_none',
-            'global_property',
+            'mtp_end',
+            'mtp_next',
+            'mtp_start',
+            'priority',
+            'private',
+            'private_property',
+            'protected',
+            'protected_property',
+            'public_property',
         ], $names);
 
         $this->assertEquals([
             ['handler' => ReflectionMethod::class, 'priority' => 24],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionProperty::class, 'priority' => 4],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 14],
             ['handler' => ReflectionMethod::class, 'priority' => 1],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionProperty::class, 'priority' => 4],
             ['handler' => ReflectionMethod::class, 'priority' => 323],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 14],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
         ], $result);
     }
@@ -117,14 +115,14 @@ class AnnotationLoaderTest extends TestCase
 
         $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
 
+        /** @var Fixtures\SampleCollector $found */
         foreach ($founds as $found) {
             $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
 
-            foreach ($found->getCollected() as $name => $sample) {
-                if (\is_object($sample['handler'])) {
-                    $sample['handler'] = \get_class($sample['handler']);
-                }
+            $collected = $found->getCollected();
+            $collected->ksort();
 
+            foreach ($collected as $name => $sample) {
                 $result[$name] = $sample;
             }
         }
@@ -132,7 +130,40 @@ class AnnotationLoaderTest extends TestCase
         $this->assertEquals([
             'attribute_specific_name' => ['handler' => ReflectionMethod::class, 'priority' => 0],
             'attribute_specific_none' => ['handler' => ReflectionMethod::class, 'priority' => 14],
-            'attribite_property'      => ['handler' => ReflectionProperty::class, 'priority' => 0],
+            'attribute_property'      => ['handler' => ReflectionProperty::class, 'priority' => 0],
+        ], $result);
+    }
+
+    /**
+     * @requires PHP <= 8
+     * @runInSeparateProcess
+     */
+    public function testAttachAttributeFallback(): void
+    {
+        $annotation = new AnnotationLoader(new FallbackAttributeReader());
+        $result     = [];
+
+        $annotation->attachListener(new Fixtures\SampleListener());
+        $annotation->attach(__DIR__ . '/Fixtures/Annotation/Attribute');
+
+        $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
+
+        /** @var Fixtures\SampleCollector $found */
+        foreach ($founds as $found) {
+            $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
+
+            $collected = $found->getCollected();
+            $collected->ksort();
+
+            foreach ($collected as $name => $sample) {
+                $result[$name] = $sample;
+            }
+        }
+
+        $this->assertEquals([
+            'attribute_specific_name' => ['handler' => ReflectionMethod::class, 'priority' => 0],
+            'attribute_specific_none' => ['handler' => ReflectionMethod::class, 'priority' => 14],
+            'attribute_property'      => ['handler' => ReflectionProperty::class, 'priority' => 0],
         ], $result);
     }
 }

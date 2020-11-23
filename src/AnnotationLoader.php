@@ -135,31 +135,7 @@ class AnnotationLoader implements LoaderInterface
                 $classReflection->getConstants()
             );
 
-            foreach ($reflections as $reflection) {
-                if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
-                    continue;
-                }
-
-                foreach ($this->getAnnotations($reflection, $listener) as $annotation) {
-                    if ($reflection instanceof ReflectionMethod) {
-                        $annotations[$className]['method'][] = [$reflection, $annotation];
-
-                        foreach ($this->getMethodParameter($reflection->getParameters(), $listener) as $parameter) {
-                            $annotations[$className]['method_property'][] = $parameter;
-                        }
-
-                        continue;
-                    }
-
-                    if ($reflection instanceof ReflectionClassConstant) {
-                        $annotations[$className]['constant'][] = [$reflection, $annotation];
-
-                        continue;
-                    }
-
-                    $annotations[$className]['property'][] = [$reflection, $annotation];
-                }
-            }
+            $this->fetchAnnotations($className, $reflections, $listener, $annotations);
         }
 
         \gc_mem_caches();
@@ -168,7 +144,6 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     *
      * @param Reflector $reflection
      *
      * @return iterable<object>
@@ -225,6 +200,47 @@ class AnnotationLoader implements LoaderInterface
                         yield [$parameter, $annotation];
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Fetch annotations from methods, constant, property and methods parameter
+     *
+     * @param string                            $className
+     * @param Reflector[]                       $reflections
+     * @param ListenerInterface                 $listener
+     * @param array<string,array<string,mixed>> $annotations
+     */
+    private function fetchAnnotations(
+        string $className,
+        array $reflections,
+        ListenerInterface $listener,
+        array &$annotations
+    ): void {
+        foreach ($reflections as $reflection) {
+            if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
+                continue;
+            }
+
+            foreach ($this->getAnnotations($reflection, $listener) as $annotation) {
+                if ($reflection instanceof ReflectionMethod) {
+                    $annotations[$className]['method'][] = [$reflection, $annotation];
+
+                    foreach ($this->getMethodParameter($reflection->getParameters(), $listener) as $parameter) {
+                        $annotations[$className]['method_property'][] = $parameter;
+                    }
+
+                    continue;
+                }
+
+                if ($reflection instanceof ReflectionClassConstant) {
+                    $annotations[$className]['constant'][] = [$reflection, $annotation];
+
+                    continue;
+                }
+
+                $annotations[$className]['property'][] = [$reflection, $annotation];
             }
         }
     }
