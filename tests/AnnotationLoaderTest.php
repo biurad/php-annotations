@@ -74,6 +74,9 @@ class AnnotationLoaderTest extends TestCase
             'default',
             'protected_property',
             'private_property',
+            'mtp_start',
+            'mtp_end',
+            'mtp_next',
             'priority',
             'private',
             'protected',
@@ -81,9 +84,6 @@ class AnnotationLoaderTest extends TestCase
             'global_specific_name',
             'global_specific_none',
             'global_property',
-            'mtp_start',
-            'mtp_end',
-            'mtp_next',
         ], $names);
 
         $this->assertEquals([
@@ -91,15 +91,15 @@ class AnnotationLoaderTest extends TestCase
             ['handler' => ReflectionProperty::class, 'priority' => 0],
             ['handler' => ReflectionProperty::class, 'priority' => 4],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 1],
+            ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 323],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 14],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 1],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
         ], $result);
     }
 
