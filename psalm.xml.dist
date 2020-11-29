@@ -23,4 +23,12 @@
     <stubs>
         <file name="vendor/vimeo/psalm/stubs/Php80.php" />
     </stubs>
+
+    <issueHandlers>
+        <PossiblyInvalidArgument>
+            <errorLevel type="suppress">
+                <referencedFunction name="Biurad\Annotations\AnnotationLoader::getAnnotations" />
+            </errorLevel>
+        </PossiblyInvalidArgument>
+    </issueHandlers>
 </psalm>
