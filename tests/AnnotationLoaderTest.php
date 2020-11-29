@@ -20,11 +20,12 @@ namespace Biurad\Annotations\Tests;
 use Biurad\Annotations\AnnotationLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use PHPUnit\Framework\TestCase;
+use ReflectionClassConstant;
 use ReflectionMethod;
+use ReflectionParameter;
 use ReflectionProperty;
 use Spiral\Attributes\AnnotationReader;
-use Spiral\Attributes\FallbackAttributeReader;
-use Spiral\Attributes\NativeAttributeReader;
+use Spiral\Attributes\AttributeReader;
 
 /**
  * AnnotationLoaderTest
@@ -102,12 +103,11 @@ class AnnotationLoaderTest extends TestCase
     }
 
     /**
-     * @requires PHP 8
      * @runInSeparateProcess
      */
     public function testAttachAttribute(): void
     {
-        $annotation = new AnnotationLoader(new NativeAttributeReader());
+        $annotation = new AnnotationLoader(new AttributeReader());
         $result     = [];
 
         $annotation->attachListener(new Fixtures\SampleListener());
@@ -128,42 +128,11 @@ class AnnotationLoaderTest extends TestCase
         }
 
         $this->assertEquals([
-            'attribute_specific_name' => ['handler' => ReflectionMethod::class, 'priority' => 0],
-            'attribute_specific_none' => ['handler' => ReflectionMethod::class, 'priority' => 14],
-            'attribute_property'      => ['handler' => ReflectionProperty::class, 'priority' => 0],
-        ], $result);
-    }
-
-    /**
-     * @requires PHP <= 8
-     * @runInSeparateProcess
-     */
-    public function testAttachAttributeFallback(): void
-    {
-        $annotation = new AnnotationLoader(new FallbackAttributeReader());
-        $result     = [];
-
-        $annotation->attachListener(new Fixtures\SampleListener());
-        $annotation->attach(__DIR__ . '/Fixtures/Annotation/Attribute');
-
-        $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
-
-        /** @var Fixtures\SampleCollector $found */
-        foreach ($founds as $found) {
-            $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
-
-            $collected = $found->getCollected();
-            $collected->ksort();
-
-            foreach ($collected as $name => $sample) {
-                $result[$name] = $sample;
-            }
-        }
-
-        $this->assertEquals([
-            'attribute_specific_name' => ['handler' => ReflectionMethod::class, 'priority' => 0],
-            'attribute_specific_none' => ['handler' => ReflectionMethod::class, 'priority' => 14],
-            'attribute_property'      => ['handler' => ReflectionProperty::class, 'priority' => 0],
+            'attribute_specific_name'   => ['handler' => ReflectionMethod::class, 'priority' => 0],
+            'attribute_specific_none'   => ['handler' => ReflectionMethod::class, 'priority' => 14],
+            'attribute_property'        => ['handler' => ReflectionProperty::class, 'priority' => 0],
+            'attribute_constant'        => ['handler' => ReflectionClassConstant::class, 'priority' => 0],
+            'attribute_method_property' => ['handler' => ReflectionParameter::class, 'priority' => 4],
         ], $result);
     }
 }

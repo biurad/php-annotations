@@ -54,7 +54,12 @@ class SampleListener implements ListenerInterface
     public function onAnnotation(array $annotations): SampleCollector
     {
         foreach ($annotations as $class => $collection) {
-            $reflections = \array_merge($collection['method'] ?? [], $collection['property'] ?? []);
+            $reflections = \array_merge(
+                $collection['method'] ?? [],
+                $collection['property'] ?? [],
+                $collection['constant'] ?? [],
+                $collection['method_property'] ?? []
+            );
 
             if (!empty($reflections)) {
                 $this->addSampleGroup($collection['class'] ?? null, $reflections);

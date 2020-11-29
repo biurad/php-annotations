@@ -22,12 +22,17 @@ use Biurad\Annotations\Tests\Fixtures\Sample;
 #[Sample(name: 'attribute')]
 class GlobalDefaultsClass
 {
+    #[Sample(name: 'constant')]
+    public const CONSTANT = 23;
+
     #[Sample('property')]
     public $attribute;
 
     #[Sample(name: 'specific_name')]
-    public function withName(): void
-    {
+    public function withName(
+        #[Sample('method_property', priority: 4)]
+        string $parameter
+    ): void {
     }
 
     #[Sample('specific_none', priority: 14)]
