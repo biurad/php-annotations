@@ -3,7 +3,7 @@
          name="PHP_CodeSniffer"
          xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd"
 >
-    <description>The coding standard for PHP Library Starter.</description>
+    <description>The coding standard for PHP Annotations.</description>
 
     <arg name="basepath" value="."/>
     <arg name="extensions" value="php"/>
@@ -20,4 +20,8 @@
 
     <!-- Include full PSR-12 Coding Standard -->
     <rule ref="PSR12"/>
+
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing">
+        <exclude-pattern>*/tests/Fixtures/Annotation/Attribute/GlobalDefaultsClass.php</exclude-pattern>
+    </rule>
 </ruleset>

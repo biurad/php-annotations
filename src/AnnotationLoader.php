@@ -211,7 +211,7 @@ class AnnotationLoader implements LoaderInterface
      * @param array<string,array<string,mixed>> $annotations
      */
     private function fetchAnnotations(string $className, array $reflections, array &$annotations): void
-    {    
+    {
         foreach ($reflections as $name => $reflection) {
             if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
                 continue;
