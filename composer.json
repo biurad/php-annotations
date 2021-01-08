@@ -23,8 +23,7 @@
     },
     "require": {
         "php": "^7.2 || ^8.0",
-        "spiral/attributes": "dev-master",
-        "symfony/polyfill-php80": "^1.20"
+        "spiral/attributes": "dev-master"
     },
     "extra": {
         "branch-alias": {
