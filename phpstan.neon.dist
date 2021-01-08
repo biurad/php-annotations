@@ -10,3 +10,6 @@ parameters:
         -
            message: "#^Unable to resolve the template type T in call to method Spiral\\\\Attributes\\\\ReaderInterface\\:\\:(getParameterMetadata\\(\\)|getFunctionMetadata\\(\\)|getClassMetadata\\(\\)|getPropertyMetadata\\(\\)|getConstantMetadata\\(\\))$#"
            path: src/AnnotationLoader.php
+        -
+           message: "#^Parameter \\#1 \\$array of class ArrayIterator constructor expects array, array\\|null given.$#"
+           path: src/AnnotationLoader.php

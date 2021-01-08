@@ -77,12 +77,19 @@ class AnnotationLoaderTest extends TestCase
             'mtp_end',
             'mtp_next',
             'mtp_start',
+            'multiple_1_default',
+            'multiple_1_protected_property',
+            'multiple_2_default',
+            'multiple_2_protected_property',
+            'multiple_3_default',
+            'multiple_3_protected_property',
             'priority',
             'private',
             'private_property',
             'protected',
             'protected_property',
             'public_property',
+            'single',
         ], $names);
 
         $this->assertEquals([
@@ -93,12 +100,19 @@ class AnnotationLoaderTest extends TestCase
             ['handler' => ReflectionMethod::class, 'priority' => 1],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 24],
+            ['handler' => ReflectionProperty::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 24],
+            ['handler' => ReflectionProperty::class, 'priority' => 0],
+            ['handler' => ReflectionMethod::class, 'priority' => 24],
+            ['handler' => ReflectionProperty::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionMethod::class, 'priority' => 0],
             ['handler' => ReflectionProperty::class, 'priority' => 4],
             ['handler' => ReflectionMethod::class, 'priority' => 323],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
             ['handler' => ReflectionProperty::class, 'priority' => 0],
+            ['handler' => Fixtures\Annotation\Valid\SingleClass::class, 'priority' => 0],
         ], $result);
     }
 
@@ -133,6 +147,11 @@ class AnnotationLoaderTest extends TestCase
             'attribute_property'        => ['handler' => ReflectionProperty::class, 'priority' => 0],
             'attribute_constant'        => ['handler' => ReflectionClassConstant::class, 'priority' => 0],
             'attribute_method_property' => ['handler' => ReflectionParameter::class, 'priority' => 4],
+            'attribute_added_specific_name'   => ['handler' => ReflectionMethod::class, 'priority' => 0],
+            'attribute_added_specific_none'   => ['handler' => ReflectionMethod::class, 'priority' => 14],
+            'attribute_added_property'        => ['handler' => ReflectionProperty::class, 'priority' => 0],
+            'attribute_added_constant'        => ['handler' => ReflectionClassConstant::class, 'priority' => 0],
+            'attribute_added_method_property' => ['handler' => ReflectionParameter::class, 'priority' => 4],
         ], $result);
     }
 }

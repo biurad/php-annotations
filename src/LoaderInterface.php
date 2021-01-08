@@ -39,4 +39,9 @@ interface LoaderInterface
      * @return iterable|mixed[]
      */
     public function load(): iterable;
+
+    /**
+     * This finds and build annotations once
+     */
+    public function build(): void;
 }

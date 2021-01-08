@@ -20,6 +20,7 @@ namespace Biurad\Annotations\Tests\Fixtures\Annotation\Attribute;
 use Biurad\Annotations\Tests\Fixtures\Sample;
 
 #[Sample(name: 'attribute')]
+#[Sample('attribute_added')]
 class GlobalDefaultsClass
 {
     #[Sample(name: 'constant')]

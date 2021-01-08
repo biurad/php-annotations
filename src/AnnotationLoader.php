@@ -32,7 +32,10 @@ use Spiral\Attributes\ReaderInterface;
 class AnnotationLoader implements LoaderInterface
 {
     /** @var ReaderInterface */
-    private $annotation;
+    private $reader;
+
+    /** @var null|mixed[] */
+    private $annotations;
 
     /** @var ListenerInterface[] */
     private $listeners = [];
@@ -45,7 +48,7 @@ class AnnotationLoader implements LoaderInterface
      */
     public function __construct(ReaderInterface $reader)
     {
-        $this->annotation = $reader;
+        $this->reader = $reader;
     }
 
     /**
@@ -71,9 +74,9 @@ class AnnotationLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function load(): iterable
+    public function build(): void
     {
-        $annotations = [];
+        $this->annotations = $annotations = [];
 
         foreach ($this->resources as $resource) {
             if (\class_exists($resource) || \is_dir($resource)) {
@@ -87,9 +90,21 @@ class AnnotationLoader implements LoaderInterface
 
         foreach ($this->listeners as $listener) {
             if (null !== $found = $listener->onAnnotation($annotations)) {
-                yield $found;
+                $this->annotations[] = $found;
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function load(): iterable
+    {
+        if (null === $this->annotations) {
+            $this->build();
+        }
+
+        yield from new \ArrayIterator($this->annotations);
     }
 
     /**
@@ -122,7 +137,7 @@ class AnnotationLoader implements LoaderInterface
             }
 
             foreach ($this->getAnnotations($classReflection) as $annotation) {
-                $annotations[$className]['class'] = $annotation;
+                $annotations[$className]['class'][] = $annotation;
             }
 
             // Reflections belonging to class object.
@@ -151,27 +166,27 @@ class AnnotationLoader implements LoaderInterface
 
         switch (true) {
             case $reflection instanceof ReflectionClass:
-                $annotations = $this->annotation->getClassMetadata($reflection);
+                $annotations = $this->reader->getClassMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionMethod:
-                $annotations = $this->annotation->getFunctionMetadata($reflection);
+                $annotations = $this->reader->getFunctionMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionProperty:
-                $annotations = $this->annotation->getPropertyMetadata($reflection);
+                $annotations = $this->reader->getPropertyMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionClassConstant:
-                $annotations = $this->annotation->getConstantMetadata($reflection);
+                $annotations = $this->reader->getConstantMetadata($reflection);
 
                 break;
 
             case $reflection instanceof ReflectionParameter:
-                $annotations = $this->annotation->getParameterMetadata($reflection);
+                $annotations = $this->reader->getParameterMetadata($reflection);
         }
 
         foreach ($annotations as $annotation) {
@@ -256,7 +271,7 @@ class AnnotationLoader implements LoaderInterface
         $declared = \get_declared_classes();
 
         foreach ($files as $file) {
-            require_once $file;
+            include $file;
         }
 
         return \array_diff(\get_declared_classes(), $declared);
