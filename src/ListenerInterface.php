@@ -22,6 +22,20 @@ interface ListenerInterface
     /**
      * This method utilises found annotations and return collector.
      *
+     * The array that is received contains eg:
+     *  ```php
+     * $annotations = [
+     *     ClassName::class => [
+     *        'class' => [$annotation, ...],
+     *        'methods' => [[$reflection, $annotation], ..],
+     *        'property' => [[$reflection, $annotation], ..],
+     *        'constant' => [[$reflection, $annotation], ..],
+     *        'method_propert' => [[$reflection, $annotation], ..],
+     *    ],
+     *    ...
+     * ];
+     * ```
+     *
      * @param array<string,array<string,mixed>> $annotations
      *
      * @return mixed

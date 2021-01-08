@@ -62,12 +62,14 @@ class SampleListener implements ListenerInterface
             );
 
             if (!empty($reflections)) {
-                $this->addSampleGroup($collection['class'] ?? null, $reflections);
+                $this->addSampleGroup($collection['class'] ?? [], $reflections);
 
                 continue;
             }
 
-            $this->addSample($collection['class'], $class);
+            foreach ($collection['class'] ?? [] as $annotation) {
+                $this->addSample($annotation, $class);
+            }
         }
 
         return $this->collector;
@@ -92,17 +94,29 @@ class SampleListener implements ListenerInterface
     }
 
     /**
-     * @param null|Sample $group
-     * @param mixed[]     $collection
+     * @param Sample[] $groups
+     * @param mixed[]  $collection
      */
-    private function addSampleGroup(?Sample $group, array $collection): void
+    private function addSampleGroup(array $groups, array $collection): void
     {
-        /**
-         * @var ReflectionMethod|ReflectionProperty $reflector
-         * @var Sample                              $annotation
-         */
-        foreach ($collection as [$reflector, $annotation]) {
-            $this->addSample($annotation, $reflector, $group);
+        $handleCollection = function (array $collection, ?Sample $group = null): void {
+            /**
+             * @var ReflectionMethod|ReflectionProperty $reflector
+             * @var Sample                              $annotation
+             */
+            foreach ($collection as [$reflector, $annotation]) {
+                $this->addSample($annotation, $reflector, $group);
+            }
+        };
+
+        if (empty($groups)) {
+            $handleCollection($collection);
+
+            return;
+        }
+
+        foreach ($groups as $group) {
+            $handleCollection($collection, $group);
         }
     }
 }
