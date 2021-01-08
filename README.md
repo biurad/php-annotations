@@ -18,7 +18,7 @@ This project requires [PHP] 7.2 or higher. The recommended way to install, is vi
 $ composer require biurad/annotations
 ```
 
-We all know writing annotations support for a project takes alot of time, work and sometimes end up changing the whole code to suite the current changes of [PHP], example of project that has messy annotations is [Nette DI][nette-di]. In short, this library is meant to be a base building block that utilizes [Doctrine Annotations][doctrine] and attributes introduced in [PHP] 8.
+We all know writing annotations support for a project takes alot of time, work and sometimes end up changing the whole code to suite the current changes of [PHP]. In short, this library is meant to be a base building block that utilizes [Doctrine Annotations][doctrine] and attributes introduced in [PHP] 8 for building your project with annotations.
 
 Let's say you working on a few projects and you need annotations support for each. With this library we make your work easier, all you need is a instance of `Biurad\Annotations\ListenerInterface` and an annotated class for finding annotations or attributes.
 
@@ -44,6 +44,8 @@ $annotation = new AnnotationLoader(new MergeReader([$doctrine, $attribute]));
 $annotation->attachListener(...); // Add your implemented Annotation listeners
 
 $annotation->attach(...); // Add a class string, classless file, or directory
+
+$annotation->build(); // Allow annotations to be compile once
 
 $listeners = \iterator_to_array($annotation->load());
 
@@ -132,4 +134,3 @@ Check out the other cool things people are doing with `biurad/php-annotations`: 
 [email]: support@biurad.com
 [message]: https://projects.biurad.com/message
 [doctrine]: https://github.com/doctrine/annotations
-[nette-di]: https://github.com/nette/di
