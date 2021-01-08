@@ -76,14 +76,27 @@ class AnnotationLoader implements LoaderInterface
      */
     public function build(): void
     {
-        $this->annotations = $annotations = [];
+        $this->annotations = $annotations = $files = [];
 
         foreach ($this->resources as $resource) {
-            if (\class_exists($resource) || \is_dir($resource)) {
-                $annotations += $this->findAnnotations($resource);
+            if (\is_dir($resource)) {
+                $files += $this->findFiles($resource);
 
                 continue;
             }
+
+            if (!\class_exists($resource)) {
+                continue;
+            }
+
+            $annotations[] = $resource;
+        }
+
+        $classes     = \array_merge($annotations, $this->findClasses($files));
+        $annotations = [];
+
+        foreach ($classes as $class) {
+            $annotations += $this->findAnnotations($class);
 
             //TODO: Read annotations from functions ...
         }
@@ -93,6 +106,8 @@ class AnnotationLoader implements LoaderInterface
                 $this->annotations[] = $found;
             }
         }
+
+        \gc_mem_caches();
     }
 
     /**
@@ -110,49 +125,36 @@ class AnnotationLoader implements LoaderInterface
     /**
      * Finds annotations in the given resource
      *
-     * @param string $resource
+     * @param class-string $resource
      *
      * @return array<string,array<string,mixed>>
      */
     private function findAnnotations(string $resource): array
     {
-        $classes = $annotations = [];
+        $annotations = [];
 
-        if (\is_dir($resource)) {
-            $classes += $this->findClasses($resource);
-        } elseif (\class_exists($resource)) {
-            $classes[] = $resource;
+        $classReflection = new ReflectionClass($resource);
+        $className       = $classReflection->getName();
+
+        if ($classReflection->isAbstract()) {
+            throw new InvalidAnnotationException(\sprintf(
+                'Annotations from class "%s" cannot be read as it is abstract.',
+                $classReflection->getName()
+            ));
         }
 
-        /** @var class-string $class */
-        foreach ($classes as $class) {
-            $classReflection = new ReflectionClass($class);
-            $className       = $classReflection->getName();
-
-            if ($classReflection->isAbstract()) {
-                throw new InvalidAnnotationException(\sprintf(
-                    'Annotations from class "%s" cannot be read as it is abstract.',
-                    $classReflection->getName()
-                ));
-            }
-
-            foreach ($this->getAnnotations($classReflection) as $annotation) {
-                $annotations[$className]['class'][] = $annotation;
-            }
-
-            // Reflections belonging to class object.
-            $reflections = \array_merge(
-                $classReflection->getMethods(),
-                $classReflection->getProperties(),
-                $classReflection->getConstants()
-            );
-
-            $this->fetchAnnotations($className, $reflections, $annotations);
+        foreach ($this->getAnnotations($classReflection) as $annotation) {
+            $annotations[$className]['class'][] = $annotation;
         }
 
-        \gc_mem_caches();
+        // Reflections belonging to class object.
+        $reflections = \array_merge(
+            $classReflection->getMethods(),
+            $classReflection->getProperties(),
+            $classReflection->getConstants()
+        );
 
-        return $annotations;
+        return $this->fetchAnnotations($className, $reflections, $annotations);
     }
 
     /**
@@ -224,8 +226,10 @@ class AnnotationLoader implements LoaderInterface
      * @param string                            $className
      * @param Reflector[]                       $reflections
      * @param array<string,array<string,mixed>> $annotations
+     *
+     * @return array<string,array<string,mixed>>
      */
-    private function fetchAnnotations(string $className, array $reflections, array &$annotations): void
+    private function fetchAnnotations(string $className, array $reflections, array $annotations): array
     {
         foreach ($reflections as $name => $reflection) {
             if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
@@ -256,22 +260,23 @@ class AnnotationLoader implements LoaderInterface
                 $annotations[$className]['property'][] = [$reflection, $annotation];
             }
         }
+
+        return $annotations;
     }
 
     /**
      * Finds classes in the given resource directory
      *
-     * @param string $resource
+     * @param string[] $files
      *
-     * @return string[]
+     * @return class-string[]
      */
-    private function findClasses(string $resource): array
+    private function findClasses(array $files): array
     {
-        $files    = $this->findFiles($resource);
         $declared = \get_declared_classes();
 
         foreach ($files as $file) {
-            include $file;
+            require_once $file;
         }
 
         return \array_diff(\get_declared_classes(), $declared);
