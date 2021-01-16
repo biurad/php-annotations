@@ -21,6 +21,10 @@
     <!-- Include full PSR-12 Coding Standard -->
     <rule ref="PSR12"/>
 
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing">
+        <exclude-pattern>*/tests/Fixtures/Annotation/Attribute/GlobalDefaultsClass.php</exclude-pattern>
+    </rule>
+
     <rule ref="PSR2.Classes.PropertyDeclaration.SpacingAfterType">
         <exclude-pattern>*/tests/Fixtures/Annotation/Attribute/GlobalDefaultsClass.php</exclude-pattern>
     </rule>
