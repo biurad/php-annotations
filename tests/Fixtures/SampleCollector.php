@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations\Tests\Fixtures;
 
-use ArrayObject;
-use Reflector;
-
 class SampleCollector
 {
     private $collected = [];
@@ -32,16 +29,16 @@ class SampleCollector
     public function add(string $name, int $priority, $handler): void
     {
         $this->collected[$name] = [
-            'handler'  => $handler instanceof Reflector ? \get_class($handler) : $handler,
+            'handler'  => $handler instanceof \Reflector ? \get_class($handler) : $handler,
             'priority' => $priority,
         ];
     }
 
     /**
-     * @return ArrayObject
+     * @return \ArrayObject
      */
-    public function getCollected(): ArrayObject
+    public function getCollected(): \ArrayObject
     {
-        return new ArrayObject($this->collected);
+        return new \ArrayObject($this->collected);
     }
 }

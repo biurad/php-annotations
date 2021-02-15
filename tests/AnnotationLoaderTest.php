@@ -20,10 +20,6 @@ namespace Biurad\Annotations\Tests;
 use Biurad\Annotations\AnnotationLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use PHPUnit\Framework\TestCase;
-use ReflectionClassConstant;
-use ReflectionMethod;
-use ReflectionParameter;
-use ReflectionProperty;
 use Spiral\Attributes\AnnotationReader;
 use Spiral\Attributes\AttributeReader;
 
@@ -93,25 +89,25 @@ class AnnotationLoaderTest extends TestCase
         ], $names);
 
         $this->assertEquals([
-            ['handler' => ReflectionMethod::class, 'priority' => 24],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 14],
-            ['handler' => ReflectionMethod::class, 'priority' => 1],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 24],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 24],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 24],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionMethod::class, 'priority' => 0],
-            ['handler' => ReflectionProperty::class, 'priority' => 4],
-            ['handler' => ReflectionMethod::class, 'priority' => 323],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
-            ['handler' => ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 24],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 14],
+            ['handler' => \ReflectionMethod::class, 'priority' => 1],
+            ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 24],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 24],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 24],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            ['handler' => \ReflectionProperty::class, 'priority' => 4],
+            ['handler' => \ReflectionMethod::class, 'priority' => 323],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            ['handler' => \ReflectionProperty::class, 'priority' => 0],
             ['handler' => Fixtures\Annotation\Valid\SingleClass::class, 'priority' => 0],
         ], $result);
     }
@@ -142,16 +138,16 @@ class AnnotationLoaderTest extends TestCase
         }
 
         $this->assertEquals([
-            'attribute_specific_name'   => ['handler' => ReflectionMethod::class, 'priority' => 0],
-            'attribute_specific_none'   => ['handler' => ReflectionMethod::class, 'priority' => 14],
-            'attribute_property'        => ['handler' => ReflectionProperty::class, 'priority' => 0],
-            'attribute_constant'        => ['handler' => ReflectionClassConstant::class, 'priority' => 0],
-            'attribute_method_property' => ['handler' => ReflectionParameter::class, 'priority' => 4],
-            'attribute_added_specific_name'   => ['handler' => ReflectionMethod::class, 'priority' => 0],
-            'attribute_added_specific_none'   => ['handler' => ReflectionMethod::class, 'priority' => 14],
-            'attribute_added_property'        => ['handler' => ReflectionProperty::class, 'priority' => 0],
-            'attribute_added_constant'        => ['handler' => ReflectionClassConstant::class, 'priority' => 0],
-            'attribute_added_method_property' => ['handler' => ReflectionParameter::class, 'priority' => 4],
+            'attribute_specific_name'   => ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            'attribute_specific_none'   => ['handler' => \ReflectionMethod::class, 'priority' => 14],
+            'attribute_property'        => ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            'attribute_constant'        => ['handler' => \ReflectionClassConstant::class, 'priority' => 0],
+            'attribute_method_property' => ['handler' => \ReflectionParameter::class, 'priority' => 4],
+            'attribute_added_specific_name'   => ['handler' => \ReflectionMethod::class, 'priority' => 0],
+            'attribute_added_specific_none'   => ['handler' => \ReflectionMethod::class, 'priority' => 14],
+            'attribute_added_property'        => ['handler' => \ReflectionProperty::class, 'priority' => 0],
+            'attribute_added_constant'        => ['handler' => \ReflectionClassConstant::class, 'priority' => 0],
+            'attribute_added_method_property' => ['handler' => \ReflectionParameter::class, 'priority' => 4],
         ], $result);
     }
 }

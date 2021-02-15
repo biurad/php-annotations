@@ -17,16 +17,6 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations;
 
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use ReflectionClass;
-use ReflectionClassConstant;
-use ReflectionMethod;
-use ReflectionParameter;
-use ReflectionProperty;
-use Reflector;
-use RegexIterator;
 use Spiral\Attributes\ReaderInterface;
 
 class AnnotationLoader implements LoaderInterface
@@ -133,7 +123,7 @@ class AnnotationLoader implements LoaderInterface
     {
         $annotations = [];
 
-        $classReflection = new ReflectionClass($resource);
+        $classReflection = new \ReflectionClass($resource);
         $className       = $classReflection->getName();
 
         if ($classReflection->isAbstract()) {
@@ -158,36 +148,36 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     * @param Reflector $reflection
+     * @param \Reflector $reflection
      *
      * @return iterable<object>
      */
-    private function getAnnotations(Reflector $reflection): iterable
+    private function getAnnotations(\Reflector $reflection): iterable
     {
         $annotations = [];
 
         switch (true) {
-            case $reflection instanceof ReflectionClass:
+            case $reflection instanceof \ReflectionClass:
                 $annotations = $this->reader->getClassMetadata($reflection);
 
                 break;
 
-            case $reflection instanceof ReflectionMethod:
+            case $reflection instanceof \ReflectionMethod:
                 $annotations = $this->reader->getFunctionMetadata($reflection);
 
                 break;
 
-            case $reflection instanceof ReflectionProperty:
+            case $reflection instanceof \ReflectionProperty:
                 $annotations = $this->reader->getPropertyMetadata($reflection);
 
                 break;
 
-            case $reflection instanceof ReflectionClassConstant:
+            case $reflection instanceof \ReflectionClassConstant:
                 $annotations = $this->reader->getConstantMetadata($reflection);
 
                 break;
 
-            case $reflection instanceof ReflectionParameter:
+            case $reflection instanceof \ReflectionParameter:
                 $annotations = $this->reader->getParameterMetadata($reflection);
         }
 
@@ -203,7 +193,7 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     * @param ReflectionParameter[] $parameters
+     * @param \ReflectionParameter[] $parameters
      *
      * @return iterable<int,object[]>
      */
@@ -224,7 +214,7 @@ class AnnotationLoader implements LoaderInterface
      * Fetch annotations from methods, constant, property and methods parameter
      *
      * @param string                            $className
-     * @param Reflector[]                       $reflections
+     * @param \Reflector[]                      $reflections
      * @param array<string,array<string,mixed>> $annotations
      *
      * @return array<string,array<string,mixed>>
@@ -232,16 +222,16 @@ class AnnotationLoader implements LoaderInterface
     private function fetchAnnotations(string $className, array $reflections, array $annotations): array
     {
         foreach ($reflections as $name => $reflection) {
-            if ($reflection instanceof ReflectionMethod && $reflection->isAbstract()) {
+            if ($reflection instanceof \ReflectionMethod && $reflection->isAbstract()) {
                 continue;
             }
 
             if (is_string($name)) {
-                $reflection = new ReflectionClassConstant($className, $name);
+                $reflection = new \ReflectionClassConstant($className, $name);
             }
 
             foreach ($this->getAnnotations($reflection) as $annotation) {
-                if ($reflection instanceof ReflectionMethod) {
+                if ($reflection instanceof \ReflectionMethod) {
                     $annotations[$className]['method'][] = [$reflection, $annotation];
 
                     foreach ($this->getMethodParameter($reflection->getParameters()) as $parameter) {
@@ -251,7 +241,7 @@ class AnnotationLoader implements LoaderInterface
                     continue;
                 }
 
-                if ($reflection instanceof ReflectionClassConstant) {
+                if ($reflection instanceof \ReflectionClassConstant) {
                     $annotations[$className]['constant'][] = [$reflection, $annotation];
 
                     continue;
@@ -291,11 +281,9 @@ class AnnotationLoader implements LoaderInterface
      */
     private function findFiles(string $resource): array
     {
-        $flags = FilesystemIterator::CURRENT_AS_PATHNAME;
-
-        $directory = new RecursiveDirectoryIterator($resource, $flags);
-        $iterator  = new RecursiveIteratorIterator($directory);
-        $files     = new RegexIterator($iterator, '/\.php$/');
+        $directory = new \RecursiveDirectoryIterator($resource, \FilesystemIterator::CURRENT_AS_PATHNAME);
+        $iterator  = new \RecursiveIteratorIterator($directory);
+        $files     = new \RegexIterator($iterator, '/\.php$/');
 
         return \iterator_to_array($files);
     }

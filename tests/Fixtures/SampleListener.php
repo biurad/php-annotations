@@ -18,9 +18,6 @@ declare(strict_types=1);
 namespace Biurad\Annotations\Tests\Fixtures;
 
 use Biurad\Annotations\ListenerInterface;
-use ReflectionMethod;
-use ReflectionProperty;
-use Reflector;
 
 class SampleListener implements ListenerInterface
 {
@@ -76,9 +73,9 @@ class SampleListener implements ListenerInterface
     }
 
     /**
-     * @param Sample           $annotation
-     * @param Reflector|string $handler
-     * @param null|Sample      $group
+     * @param Sample            $annotation
+     * @param \Reflector|string $handler
+     * @param null|Sample       $group
      */
     private function addSample(Sample $annotation, $handler, ?Sample $group = null): void
     {
@@ -101,7 +98,7 @@ class SampleListener implements ListenerInterface
     {
         $handleCollection = function (array $collection, ?Sample $group = null): void {
             /**
-             * @var ReflectionMethod|ReflectionProperty $reflector
+             * @var \ReflectionMethod|\ReflectionProperty $reflector
              * @var Sample                              $annotation
              */
             foreach ($collection as [$reflector, $annotation]) {

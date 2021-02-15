@@ -17,8 +17,6 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations;
 
-use InvalidArgumentException;
-
-class InvalidAnnotationException extends InvalidArgumentException
+class InvalidAnnotationException extends \InvalidArgumentException
 {
 }

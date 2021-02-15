@@ -17,8 +17,6 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations\Tests\Fixtures;
 
-use InvalidArgumentException;
-
 /**
  *  Annotation class for @Listener().
  *
@@ -53,14 +51,14 @@ final class Sample
         $this->priority = $data['priority'] ?? $priority;
 
         if (empty($this->name) || !\is_string($this->name)) {
-            throw new InvalidArgumentException(\sprintf(
+            throw new \InvalidArgumentException(\sprintf(
                 '@Sample.name must %s.',
                 empty($this->event) ? 'be not an empty string' : 'contain only a string'
             ));
         }
 
         if (!\is_integer($this->priority)) {
-            throw new InvalidArgumentException('@Sample.priority must contain only an integer');
+            throw new \InvalidArgumentException('@Sample.priority must contain only an integer');
         }
     }
 
