@@ -33,12 +33,17 @@ class AnnotationLoader implements LoaderInterface
     /** @var string[] */
     private $resources = [];
 
+    /** @var null|callable(string[]) */
+    private $classLoader;
+
     /**
      * @param ReaderInterface $reader
+     * @param callable        $classLoader
      */
-    public function __construct(ReaderInterface $reader)
+    public function __construct(ReaderInterface $reader, callable $classLoader = null)
     {
         $this->reader = $reader;
+        $this->classLoader = $classLoader;
     }
 
     /**
@@ -66,7 +71,7 @@ class AnnotationLoader implements LoaderInterface
      */
     public function build(): void
     {
-        $this->annotations = $annotations = $files = [];
+        $this->annotations = $annotations = $classes = $files = [];
 
         foreach ($this->resources as $resource) {
             if (\is_dir($resource)) {
@@ -79,11 +84,10 @@ class AnnotationLoader implements LoaderInterface
                 continue;
             }
 
-            $annotations[] = $resource;
+            $classes[] = $resource;
         }
 
-        $classes     = \array_merge($annotations, $this->findClasses($files));
-        $annotations = [];
+        $classes += $this->findClasses($files);
 
         foreach ($classes as $class) {
             $annotations += $this->findAnnotations($class);
@@ -109,7 +113,7 @@ class AnnotationLoader implements LoaderInterface
             $this->build();
         }
 
-        yield from new \ArrayIterator($this->annotations);
+        return yield from $this->annotations;
     }
 
     /**
@@ -263,6 +267,10 @@ class AnnotationLoader implements LoaderInterface
      */
     private function findClasses(array $files): array
     {
+        if (null !== $this->classLoader) {
+            return ($this->classLoader)($files);
+        }
+
         $declared = \get_declared_classes();
 
         foreach ($files as $file) {
