@@ -2,14 +2,6 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
 
 parameters:
-    level: max
+    level: 2
     paths: [src]
     checkGenericClassInNonGenericObjectType: false
-
-    ignoreErrors:
-        -
-           message: "#^Unable to resolve the template type T in call to method Spiral\\\\Attributes\\\\ReaderInterface\\:\\:(getParameterMetadata\\(\\)|getFunctionMetadata\\(\\)|getClassMetadata\\(\\)|getPropertyMetadata\\(\\)|getConstantMetadata\\(\\))$#"
-           path: src/AnnotationLoader.php
-        -
-           message: "#^Argument of an invalid type array\\|null passed to yield from, only iterables are supported.$#"
-           path: src/AnnotationLoader.php

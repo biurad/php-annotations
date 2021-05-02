@@ -30,12 +30,15 @@ abstract class Annotation implements \Stringable
     /** @var \ReflectionClass|\ReflectionClassConstant|\ReflectionProperty|\ReflectionFunctionAbstract|\ReflectionParameter */
     protected $reflection;
 
+    /**
+     * @param iterable<object> $annotations
+     */
     public function __construct(iterable $annotations)
     {
         $this->annotations = $annotations;
     }
 
-    abstract public function getReflection();
+    abstract public function getReflection(): \Reflector;
 
     /**
      * {@inheritdoc}

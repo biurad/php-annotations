@@ -3,7 +3,7 @@
        xmlns="https://getpsalm.org/schema/config"
        name="Psalm for PHP Annotations"
        useDocblockTypes="true"
-       errorLevel="3"
+       errorLevel="7"
        strictBinaryOperands="false"
        rememberPropertyAssignmentsAfterCall="true"
        checkForThrowsDocblock="false"
@@ -20,15 +20,11 @@
         </ignoreFiles>
     </projectFiles>
 
-    <stubs>
-        <file name="vendor/vimeo/psalm/stubs/Php80.php" />
-    </stubs>
-
     <issueHandlers>
-        <PossiblyInvalidArgument>
+        <MethodSignatureMismatch>
             <errorLevel type="suppress">
-                <referencedFunction name="Biurad\Annotations\AnnotationLoader::getAnnotations" />
+                <directory name="src/Locate"/>
             </errorLevel>
-        </PossiblyInvalidArgument>
+        </MethodSignatureMismatch>
     </issueHandlers>
 </psalm>

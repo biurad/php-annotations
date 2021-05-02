@@ -36,4 +36,8 @@
     <rule ref="PSR12.Files.FileHeader.IncorrectOrder">
         <exclude-pattern>*/tests/Fixtures/Sample.php</exclude-pattern>
     </rule>
+
+    <rule ref="Squiz.Classes.ValidClassName.NotCamelCaps">
+        <exclude-pattern>*/src/Locate/*_.php</exclude-pattern>
+    </rule>
 </ruleset>
