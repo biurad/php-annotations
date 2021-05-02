@@ -22,38 +22,14 @@ interface ListenerInterface
     /**
      * This method utilises found annotations and return collector.
      *
-     * The array that is received contains eg:
-     *  ```php
-     * $annotations = [
-     *     ClassName::class => [
-     *        'class' => [$annotation, ...],
-     *        'methods' => [[$reflection, $annotation], ..],
-     *        'property' => [[$reflection, $annotation], ..],
-     *        'constant' => [[$reflection, $annotation], ..],
-     *        'method_propert' => [[$reflection, $annotation], ..],
-     *    ],
-     *    ...
-     * ];
-     * ```
-     *
-     * @param array<string,array<string,mixed>> $annotations
+     * @param Locate\Class_[]|Locate\Function_[] $annotations
      *
      * @return mixed
      */
-    public function onAnnotation(array $annotations);
+    public function load(array $annotations);
 
     /**
-     * The annotation class to find
-     *
-     * @return string
+     * The annotation class to find.
      */
     public function getAnnotation(): string;
-
-    /**
-     * This methods gets the annotation from a function or method's
-     * paramater.
-     *
-     * @return string[]
-     */
-    public function getArguments(): array;
 }

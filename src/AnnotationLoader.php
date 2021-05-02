@@ -102,7 +102,7 @@ class AnnotationLoader implements LoaderInterface
                 }
             }
 
-            $found = $listener->onAnnotation($listenerAnnotations);
+            $found = $listener->load($listenerAnnotations);
 
             if (null !== $found) {
                 $this->annotations[] = $found;

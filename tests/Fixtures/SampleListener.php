@@ -18,6 +18,9 @@ declare(strict_types=1);
 namespace Biurad\Annotations\Tests\Fixtures;
 
 use Biurad\Annotations\ListenerInterface;
+use Biurad\Annotations\Locate\Annotation;
+use Biurad\Annotations\Locate\Class_;
+use Biurad\Annotations\Locate\Method;
 
 class SampleListener implements ListenerInterface
 {
@@ -32,14 +35,6 @@ class SampleListener implements ListenerInterface
     /**
      * {@inheritdoc}
      */
-    public function getArguments(): array
-    {
-        return ['parameter'];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getAnnotation(): string
     {
         return 'Biurad\Annotations\Tests\Fixtures\Sample';
@@ -48,24 +43,35 @@ class SampleListener implements ListenerInterface
     /**
      * {@inheritdoc}
      */
-    public function onAnnotation(array $annotations): SampleCollector
+    public function load(array $annotations): SampleCollector
     {
-        foreach ($annotations as $class => $collection) {
-            $reflections = \array_merge(
-                $collection['method'] ?? [],
-                $collection['property'] ?? [],
-                $collection['constant'] ?? [],
-                $collection['method_property'] ?? []
-            );
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Class_) {
+                $attributes = \array_merge($annotation->methods, $annotation->properties, $annotation->constants);
 
-            if (!empty($reflections)) {
-                $this->addSampleGroup($collection['class'] ?? [], $reflections);
+                if ([] === $attributes) {
+                    $this->addSample(null, $annotation);
+
+                    continue;
+                }
+
+                foreach ($attributes as $attribute) {
+                    $this->addSample($annotation->getAnnotation(), $attribute);
+
+                    if ($attribute instanceof Method) {
+                        foreach ($attribute->parameters as $parameter) {
+                            $this->addSample($annotation->getAnnotation(), $parameter);
+                        }
+                    }
+                }
 
                 continue;
             }
 
-            foreach ($collection['class'] ?? [] as $annotation) {
-                $this->addSample($annotation, $class);
+            $this->addSample(null, $annotation);
+
+            foreach ($annotation->parameters as $parameter) {
+                $this->addSample(null, $parameter);
             }
         }
 
@@ -73,47 +79,29 @@ class SampleListener implements ListenerInterface
     }
 
     /**
-     * @param Sample            $annotation
-     * @param \Reflector|string $handler
-     * @param null|Sample       $group
+     * @param Sample[]|Sample|null $attribute
      */
-    private function addSample(Sample $annotation, $handler, ?Sample $group = null): void
+    private function addSample($attribute, Annotation $listener): void
     {
-        $name     = $annotation->getName();
-        $priority = $annotation->getPriority();
-
-        if (null !== $group) {
-            $name = $group->getName() . '_' . $name;
-            $priority += $group->getPriority();
-        }
-
-        $this->collector->add($name, $priority, $handler);
-    }
-
-    /**
-     * @param Sample[] $groups
-     * @param mixed[]  $collection
-     */
-    private function addSampleGroup(array $groups, array $collection): void
-    {
-        $handleCollection = function (array $collection, ?Sample $group = null): void {
-            /**
-             * @var \ReflectionMethod|\ReflectionProperty $reflector
-             * @var Sample                              $annotation
-             */
-            foreach ($collection as [$reflector, $annotation]) {
-                $this->addSample($annotation, $reflector, $group);
+        if (is_array($attribute) && [] !== $attribute) {
+            foreach ($attribute as $annotation) {
+                $this->addSample($annotation, $listener);
             }
-        };
-
-        if (empty($groups)) {
-            $handleCollection($collection);
 
             return;
         }
 
-        foreach ($groups as $group) {
-            $handleCollection($collection, $group);
+        /** @var Sample $annotated */
+        foreach ($listener->getAnnotation() as $annotated) {
+            $name = $annotated->getName();
+            $priority = $annotated->getPriority();
+
+            if ($attribute instanceof Sample) {
+                $name = $attribute->getName() . '_' . $name;
+                $priority += $attribute->getPriority();
+            }
+
+            $this->collector->add($name, $priority, $listener->getReflection());
         }
     }
 }
