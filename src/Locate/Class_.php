@@ -28,9 +28,6 @@ class Class_ extends Annotation
     /** @var Property[] */
     public $properties = [];
 
-    /** @var bool */
-    public $empty = false;
-
     public function __construct(iterable $annotations, \ReflectionClass $reflection)
     {
         $this->reflection = $reflection;
