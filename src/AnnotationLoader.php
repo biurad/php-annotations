@@ -19,12 +19,17 @@ namespace Biurad\Annotations;
 
 use Spiral\Attributes\ReaderInterface;
 
+/**
+ * This class allows loading of annotations/attributes using listeners.
+ *
+ * @author Divine Niiquaye Ibok <divineibok@gmail.com>
+ */
 class AnnotationLoader implements LoaderInterface
 {
     /** @var ReaderInterface */
     private $reader;
 
-    /** @var null|mixed[] */
+    /** @var mixed[] */
     private $annotations;
 
     /** @var ListenerInterface[] */
@@ -37,8 +42,7 @@ class AnnotationLoader implements LoaderInterface
     private $classLoader;
 
     /**
-     * @param ReaderInterface $reader
-     * @param callable        $classLoader
+     * @param callable $classLoader
      */
     public function __construct(ReaderInterface $reader, callable $classLoader = null)
     {
@@ -76,7 +80,7 @@ class AnnotationLoader implements LoaderInterface
                 continue;
             }
 
-            if (!\class_exists($resource)) {
+            if (!(\class_exists($resource) || \function_exists($resource))) {
                 continue;
             }
 
@@ -86,13 +90,21 @@ class AnnotationLoader implements LoaderInterface
         $classes += $this->findClasses($files);
 
         foreach ($classes as $class) {
-            $annotations += $this->findAnnotations($class);
-
-            //TODO: Read annotations from functions ...
+            $annotations[] = $this->findAnnotations($class);
         }
 
         foreach ($this->listeners as $listener) {
-            if (null !== $found = $listener->onAnnotation($annotations)) {
+            $listenerAnnotations = [];
+
+            foreach ($annotations as $annotation) {
+                if (isset($annotation[$listener->getAnnotation()])) {
+                    $listenerAnnotations[] = $annotation[$listener->getAnnotation()];
+                }
+            }
+
+            $found = $listener->onAnnotation($listenerAnnotations);
+
+            if (null !== $found) {
                 $this->annotations[] = $found;
             }
         }
@@ -109,153 +121,168 @@ class AnnotationLoader implements LoaderInterface
             $this->build();
         }
 
-        return yield from $this->annotations;
+        return $this->annotations;
     }
 
     /**
-     * Finds annotations in the given resource
+     * Finds annotations in the given resource.
      *
-     * @param class-string $resource
+     * @param class-string|string $resource
      *
-     * @return array<string,array<string,mixed>>
+     * @return Locate\Class_[]|Locate\Function_[]
      */
-    private function findAnnotations(string $resource): array
+    private function findAnnotations(string $resource)
     {
         $annotations = [];
 
-        $classReflection = new \ReflectionClass($resource);
-        $className       = $classReflection->getName();
-
-        if ($classReflection->isAbstract()) {
-            throw new InvalidAnnotationException(\sprintf(
-                'Annotations from class "%s" cannot be read as it is abstract.',
-                $classReflection->getName()
-            ));
-        }
-
-        foreach ($this->getAnnotations($classReflection) as $annotation) {
-            $annotations[$className]['class'][] = $annotation;
-        }
-
-        // Reflections belonging to class object.
-        $reflections = \array_merge(
-            $classReflection->getMethods(),
-            $classReflection->getProperties(),
-            $classReflection->getConstants()
-        );
-
-        return $this->fetchAnnotations($className, $reflections, $annotations);
-    }
-
-    /**
-     * @param \Reflector $reflection
-     *
-     * @return iterable<object>
-     */
-    private function getAnnotations(\Reflector $reflection): iterable
-    {
-        $annotations = [];
-
-        switch (true) {
-            case $reflection instanceof \ReflectionClass:
-                $annotations = $this->reader->getClassMetadata($reflection);
-
-                break;
-
-            case $reflection instanceof \ReflectionMethod:
-                $annotations = $this->reader->getFunctionMetadata($reflection);
-
-                break;
-
-            case $reflection instanceof \ReflectionProperty:
-                $annotations = $this->reader->getPropertyMetadata($reflection);
-
-                break;
-
-            case $reflection instanceof \ReflectionClassConstant:
-                $annotations = $this->reader->getConstantMetadata($reflection);
-
-                break;
-
-            case $reflection instanceof \ReflectionParameter:
-                $annotations = $this->reader->getParameterMetadata($reflection);
-        }
-
-        foreach ($annotations as $annotation) {
-            foreach ($this->listeners as $listener) {
-                $annotationClass = $listener->getAnnotation();
-
-                if ($annotation instanceof $annotationClass) {
-                    yield $annotation;
-                }
-            }
-        }
-    }
-
-    /**
-     * @param \ReflectionParameter[] $parameters
-     *
-     * @return iterable<int,object[]>
-     */
-    private function getMethodParameter(array $parameters): iterable
-    {
         foreach ($this->listeners as $listener) {
-            foreach ($parameters as $parameter) {
-                if (\in_array($parameter->getName(), $listener->getArguments(), true)) {
-                    foreach ($this->getAnnotations($parameter) as $annotation) {
-                        yield [$parameter, $annotation];
-                    }
-                }
-            }
-        }
-    }
+            $annotationClass = $listener->getAnnotation();
 
-    /**
-     * Fetch annotations from methods, constant, property and methods parameter
-     *
-     * @param string                            $className
-     * @param \Reflector[]                      $reflections
-     * @param array<string,array<string,mixed>> $annotations
-     *
-     * @return array<string,array<string,mixed>>
-     */
-    private function fetchAnnotations(string $className, array $reflections, array $annotations): array
-    {
-        foreach ($reflections as $name => $reflection) {
-            if ($reflection instanceof \ReflectionMethod && $reflection->isAbstract()) {
+            if (\function_exists($resource)) {
+                $funcReflection = new \ReflectionFunction($resource);
+                $function = $this->fetchFunctionAnnotation($funcReflection, $this->getAnnotations($funcReflection, $annotationClass), $annotationClass);
+
+                if (null !== $function) {
+                    $annotations[$annotationClass] = $function;
+                }
+
                 continue;
             }
 
-            if (is_string($name)) {
-                $reflection = new \ReflectionClassConstant($className, $name);
+            $classReflection = new \ReflectionClass($resource);
+
+            if ($classReflection->isAbstract()) {
+                continue;
             }
 
-            foreach ($this->getAnnotations($reflection) as $annotation) {
-                if ($reflection instanceof \ReflectionMethod) {
-                    $annotations[$className]['method'][] = [$reflection, $annotation];
+            $annotation = new Locate\Class_($this->getAnnotations($classReflection, $annotationClass), $classReflection);
 
-                    foreach ($this->getMethodParameter($reflection->getParameters()) as $parameter) {
-                        $annotations[$className]['method_property'][] = $parameter;
-                    }
+            // Reflections belonging to class object.
+            $reflections = \array_merge(
+                $classReflection->getMethods(),
+                $classReflection->getProperties(),
+                $classReflection->getConstants()
+            );
 
-                    continue;
-                }
-
-                if ($reflection instanceof \ReflectionClassConstant) {
-                    $annotations[$className]['constant'][] = [$reflection, $annotation];
-
-                    continue;
-                }
-
-                $annotations[$className]['property'][] = [$reflection, $annotation];
-            }
+            $annotations[$annotationClass] = $this->fetchAnnotations($annotation, $reflections, $annotationClass);
         }
 
         return $annotations;
     }
 
     /**
-     * Finds classes in the given resource directory
+     * @param class-string $annotation
+     *
+     * @return iterable<object>
+     */
+    private function getAnnotations(\Reflector $reflection, string $annotation): iterable
+    {
+        $annotations = [];
+
+        switch (true) {
+            case $reflection instanceof \ReflectionClass:
+                $annotations = $this->reader->getClassMetadata($reflection, $annotation);
+
+                break;
+
+            case $reflection instanceof \ReflectionFunctionAbstract:
+                $annotations = $this->reader->getFunctionMetadata($reflection, $annotation);
+
+                break;
+
+            case $reflection instanceof \ReflectionProperty:
+                $annotations = $this->reader->getPropertyMetadata($reflection, $annotation);
+
+                break;
+
+            case $reflection instanceof \ReflectionClassConstant:
+                $annotations = $this->reader->getConstantMetadata($reflection, $annotation);
+
+                break;
+
+            case $reflection instanceof \ReflectionParameter:
+                $annotations = $this->reader->getParameterMetadata($reflection, $annotation);
+        }
+
+        return $annotations instanceof \Generator ? \iterator_to_array($annotations) : $annotations;
+    }
+
+    /**
+     * Fetch annotations from methods, constant, property and methods parameter.
+     *
+     * @param \Reflector[] $reflections
+     */
+    private function fetchAnnotations(Locate\Class_ $classAnnotation, array $reflections, string $annotationClass): ?Locate\Class_
+    {
+        $classRefCount = 0;
+
+        foreach ($reflections as $name => $reflection) {
+            if (\is_string($name)) {
+                $reflection = new \ReflectionClassConstant((string) $classAnnotation, $name);
+            }
+
+            $annotations = $this->getAnnotations($reflection, $annotationClass);
+
+            if ($reflection instanceof \ReflectionMethod) {
+                $method = $this->fetchFunctionAnnotation($reflection, $annotations, $annotationClass);
+
+                if ($method instanceof Locate\Method) {
+                    $classAnnotation->methods[] = $method;
+                    ++$classRefCount;
+                }
+
+                continue;
+            }
+
+            if ([] === $annotations) {
+                continue;
+            }
+            ++$classRefCount;
+
+            if ($reflection instanceof \ReflectionProperty) {
+                $classAnnotation->properties[] = new Locate\Property($annotations, $reflection);
+
+                continue;
+            }
+
+            if ($reflection instanceof \ReflectionClassConstant) {
+                $classAnnotation->constants[] = new Locate\Constant($annotations, $reflection);
+
+                continue;
+            }
+        }
+
+        if (0 === $classRefCount && [] === $classAnnotation->getAnnotation()) {
+            return null;
+        }
+
+        return $classAnnotation;
+    }
+
+    /**
+     * @return Locate\Method|Locate\Function_|null
+     */
+    private function fetchFunctionAnnotation(\ReflectionFunctionAbstract $reflection, iterable $annotations, string $annotationClass)
+    {
+        if ($reflection instanceof \ReflectionMethod) {
+            $function = new Locate\Method($annotations, $reflection);
+        } else {
+            $function = new Locate\Function_($annotations, $reflection);
+        }
+
+        foreach ($reflection->getParameters() as $parameter) {
+            $attributes = $this->getAnnotations($parameter, $annotationClass);
+
+            if ([] !== $attributes) {
+                $function->parameters[] = new Locate\Parameter($attributes, $parameter);
+            }
+        }
+
+        return ([] !== $annotations || [] !== $function->parameters) ? $function : null;
+    }
+
+    /**
+     * Finds classes in the given resource directory.
      *
      * @param string[] $files
      *
@@ -263,6 +290,10 @@ class AnnotationLoader implements LoaderInterface
      */
     private function findClasses(array $files): array
     {
+        if ([] === $files) {
+            return [];
+        }
+
         if (null !== $this->classLoader) {
             return ($this->classLoader)($files);
         }
@@ -277,17 +308,15 @@ class AnnotationLoader implements LoaderInterface
     }
 
     /**
-     * Finds files in the given resource
-     *
-     * @param string $resource
+     * Finds files in the given resource.
      *
      * @return string[]
      */
     private function findFiles(string $resource): array
     {
         $directory = new \RecursiveDirectoryIterator($resource, \FilesystemIterator::CURRENT_AS_PATHNAME);
-        $iterator  = new \RecursiveIteratorIterator($directory);
-        $files     = new \RegexIterator($iterator, '/\.php$/');
+        $iterator = new \RecursiveIteratorIterator($directory);
+        $files = new \RegexIterator($iterator, '/\.php$/');
 
         return \iterator_to_array($files);
     }
