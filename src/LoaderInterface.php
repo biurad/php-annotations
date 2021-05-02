@@ -24,17 +24,17 @@ interface LoaderInterface
      *
      * @param string ...$resources type of class string, file, or directory
      */
-    public function attach(string ...$resources): void;
+    public function resource(string ...$resources): void;
 
     /**
      * Attache(s) the given listener(s) to the loader
      *
      * @param ListenerInterface ...$listeners
      */
-    public function attachListener(ListenerInterface ...$listeners): void;
+    public function listener(ListenerInterface ...$listeners): void;
 
     /**
-     * Loads routes from attached resources
+     * Loads annotations from attached resources
      *
      * @return iterable|mixed[]
      */

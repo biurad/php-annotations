@@ -49,21 +49,17 @@ class AnnotationLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function attachListener(ListenerInterface ...$listeners): void
+    public function listener(ListenerInterface ...$listeners): void
     {
-        foreach ($listeners as $listener) {
-            $this->listeners[] = $listener;
-        }
+        $this->listeners += $listeners;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attach(string ...$resources): void
+    public function resource(string ...$resources): void
     {
-        foreach ($resources as $resource) {
-            $this->resources[] = $resource;
-        }
+        $this->resources += $resources;
     }
 
     /**
