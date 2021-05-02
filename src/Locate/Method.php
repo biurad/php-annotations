@@ -28,6 +28,9 @@ class Method extends Annotation
         parent::__construct($annotations);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getReflection(): \ReflectionMethod
     {
         return $this->reflection;

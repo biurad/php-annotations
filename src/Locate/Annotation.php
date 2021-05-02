@@ -38,7 +38,10 @@ abstract class Annotation implements \Stringable
         $this->annotations = $annotations;
     }
 
-    abstract public function getReflection(): \Reflector;
+    /**
+     * Get the reflection object used in annotation.
+     */
+    abstract public function getReflection();
 
     /**
      * {@inheritdoc}

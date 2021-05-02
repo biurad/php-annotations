@@ -25,6 +25,9 @@ class Property extends Annotation
         parent::__construct($annotations);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getReflection(): \ReflectionProperty
     {
         return $this->reflection;

@@ -28,6 +28,9 @@ class Function_ extends Annotation
         parent::__construct($annotations);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getReflection(): \ReflectionFunction
     {
         return $this->reflection;
