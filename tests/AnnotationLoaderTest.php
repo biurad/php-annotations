@@ -28,6 +28,7 @@ use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
 use Spiral\Attributes\AnnotationReader;
 use Spiral\Attributes\AttributeReader;
+use Spiral\Attributes\Composite\MergeReader;
 
 /**
  * AnnotationLoaderTest
@@ -36,6 +37,8 @@ class AnnotationLoaderTest extends TestCase
 {
     protected function setUp(): void
     {
+        require_once __DIR__ . '/Fixtures/Annotation/function.php';
+
         // doctrine/annotations ^1.0 compatibility.
         if (\method_exists(AnnotationRegistry::class, 'registerLoader')) {
             AnnotationRegistry::registerLoader('\\class_exists');
@@ -46,18 +49,18 @@ class AnnotationLoaderTest extends TestCase
      * @dataProvider provideAnnotationLoader
      * @runInSeparateProcess
      */
-    public function testAttach($loader): void
+    public function testAnnotationListenerWithResource($loader): void
     {
         $annotation = new AnnotationLoader(new AnnotationReader(), $loader);
         $result     = $names = [];
 
-        $annotation->attachListener(new Fixtures\SampleListener());
-        $annotation->attach(...[
+        $annotation->listener(new Fixtures\SampleListener());
+        $annotation->resource(...[
             __DIR__ . '/Fixtures/Annotation/Valid',
             'non-existing-file.php',
         ]);
 
-        $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
+        $this->assertCount(1, $founds = $annotation->load());
 
         /** @var Fixtures\SampleCollector $found */
         foreach ($founds as $found) {
@@ -115,7 +118,7 @@ class AnnotationLoaderTest extends TestCase
             ['handler' => \ReflectionMethod::class, 'priority' => 323],
             ['handler' => \ReflectionProperty::class, 'priority' => 0],
             ['handler' => \ReflectionProperty::class, 'priority' => 0],
-            ['handler' => Fixtures\Annotation\Valid\SingleClass::class, 'priority' => 0],
+            ['handler' => \ReflectionClass::class, 'priority' => 0],
         ], $result);
     }
 
@@ -123,15 +126,15 @@ class AnnotationLoaderTest extends TestCase
      * @dataProvider provideAnnotationLoader
      * @runInSeparateProcess
      */
-    public function testAttachAttribute($loader): void
+    public function testAnnotationLoaderWithAttribute($loader): void
     {
         $annotation = new AnnotationLoader(new AttributeReader(), $loader);
         $result     = [];
 
-        $annotation->attachListener(new Fixtures\SampleListener());
-        $annotation->attach(__DIR__ . '/Fixtures/Annotation/Attribute');
+        $annotation->listener(new Fixtures\SampleListener());
+        $annotation->resource(__DIR__ . '/Fixtures/Annotation/Attribute');
 
-        $this->assertCount(1, $founds = \iterator_to_array($annotation->load()));
+        $this->assertCount(1, $founds = $annotation->load());
 
         /** @var Fixtures\SampleCollector $found */
         foreach ($founds as $found) {
@@ -157,6 +160,33 @@ class AnnotationLoaderTest extends TestCase
             'attribute_added_constant'        => ['handler' => \ReflectionClassConstant::class, 'priority' => 0],
             'attribute_added_method_property' => ['handler' => \ReflectionParameter::class, 'priority' => 4],
         ], $result);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testAnnotationLoaderWithFunction(): void
+    {
+        $annotation = new AnnotationLoader(new MergeReader([new AnnotationReader(), new AttributeReader()]));
+        $result     = $names = [];
+
+        $annotation->listener(new Fixtures\SampleListener());
+        $annotation->resource('Biurad\\Annotations\\Tests\\Fixtures\\Valid\\annotated_function');
+
+        /** @var Fixtures\SampleCollector $found */
+        foreach ($annotation->load() as $found) {
+            $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
+
+            $collected = $found->getCollected();
+            $collected->ksort();
+
+            foreach ($collected as $name => $sample) {
+                $names[]  = $name;
+                $result[] = $sample;
+            }
+        }
+
+        $this->assertEquals(['attributed_function', 'function_property'], $names);
     }
 
     public function provideAnnotationLoader(): array

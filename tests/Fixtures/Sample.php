@@ -21,7 +21,7 @@ namespace Biurad\Annotations\Tests\Fixtures;
  *  Annotation class for @Listener().
  *
  * @Annotation
- * @Target({"CLASS", "METHOD", "PROPERTY"})
+ * @Target({"CLASS", "METHOD", "FUNCTION", "PROPERTY"})
  */
 
 #[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_PROPERTY | \Attribute::TARGET_CLASS_CONSTANT | \Attribute::TARGET_PARAMETER)]
