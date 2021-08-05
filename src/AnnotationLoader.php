@@ -32,7 +32,7 @@ class AnnotationLoader implements LoaderInterface
     /** @var mixed[] */
     private $annotations;
 
-    /** @var ListenerInterface[] */
+    /** @var array<string,ListenerInterface> */
     private $listeners = [];
 
     /** @var string[] */
@@ -59,7 +59,9 @@ class AnnotationLoader implements LoaderInterface
      */
     public function listener(ListenerInterface ...$listeners): void
     {
-        $this->listeners += $listeners;
+        foreach ($listeners as $listener) {
+            $this->listeners[$listener->getAnnotation()] = $listener;
+        }
     }
 
     /**
@@ -67,7 +69,9 @@ class AnnotationLoader implements LoaderInterface
      */
     public function resource(string ...$resources): void
     {
-        $this->resources += $resources;
+        foreach ($resources as $resource) {
+            $this->resources[] = $resource;
+        }
     }
 
     /**
