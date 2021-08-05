@@ -5,3 +5,6 @@ parameters:
     level: 2
     paths: [src]
     checkGenericClassInNonGenericObjectType: false
+
+    ignoreErrors:
+        - "#^Construct empty\\(\\) is not allowed. Use more strict comparison.|Call to an undefined method Reflector\\:\\:getAttributes\\(\\).$#"
