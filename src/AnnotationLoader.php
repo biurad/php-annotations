@@ -26,7 +26,7 @@ use Spiral\Attributes\ReaderInterface;
  */
 class AnnotationLoader implements LoaderInterface
 {
-    /** @var ReaderInterface */
+    /** @var ReaderInterface|null */
     private $reader;
 
     /** @var mixed[] */
@@ -44,8 +44,12 @@ class AnnotationLoader implements LoaderInterface
     /**
      * @param callable $classLoader
      */
-    public function __construct(ReaderInterface $reader, callable $classLoader = null)
+    public function __construct(ReaderInterface $reader = null, callable $classLoader = null)
     {
+        if (\PHP_VERSION_ID < 80000 && null === $reader) {
+            throw new \RuntimeException(\sprintf('A "%s" instance to read annotations/attributes not available.', ReaderInterface::class));
+        }
+
         $this->reader = $reader;
         $this->classLoader = $classLoader;
     }
@@ -179,6 +183,11 @@ class AnnotationLoader implements LoaderInterface
     {
         $annotations = [];
 
+        if (null === $this->reader) {
+            return \array_map(static function (\ReflectionAttribute $attribute): object {
+                return $attribute->newInstance();
+            }, $reflection->getAttributes($annotation));
+        }
 
         if ($reflection instanceof \ReflectionClass) {
             $annotations = $this->reader->getClassMetadata($reflection, $annotation);
