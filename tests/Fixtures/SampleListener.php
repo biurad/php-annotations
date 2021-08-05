@@ -27,7 +27,7 @@ class SampleListener implements ListenerInterface
     /** @var SampleCollector */
     private $collector;
 
-    public function __construct(?SampleCollector $collector = null)
+    public function __construct(SampleCollector $collector = null)
     {
         $this->collector = $collector ?? new SampleCollector();
     }
@@ -83,7 +83,7 @@ class SampleListener implements ListenerInterface
      */
     private function addSample($attribute, Annotation $listener): void
     {
-        if (is_array($attribute) && [] !== $attribute) {
+        if (\is_array($attribute) && [] !== $attribute) {
             foreach ($attribute as $annotation) {
                 $this->addSample($annotation, $listener);
             }
