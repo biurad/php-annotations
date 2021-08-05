@@ -179,29 +179,17 @@ class AnnotationLoader implements LoaderInterface
     {
         $annotations = [];
 
-        switch (true) {
-            case $reflection instanceof \ReflectionClass:
-                $annotations = $this->reader->getClassMetadata($reflection, $annotation);
 
-                break;
-
-            case $reflection instanceof \ReflectionFunctionAbstract:
-                $annotations = $this->reader->getFunctionMetadata($reflection, $annotation);
-
-                break;
-
-            case $reflection instanceof \ReflectionProperty:
-                $annotations = $this->reader->getPropertyMetadata($reflection, $annotation);
-
-                break;
-
-            case $reflection instanceof \ReflectionClassConstant:
-                $annotations = $this->reader->getConstantMetadata($reflection, $annotation);
-
-                break;
-
-            case $reflection instanceof \ReflectionParameter:
-                $annotations = $this->reader->getParameterMetadata($reflection, $annotation);
+        if ($reflection instanceof \ReflectionClass) {
+            $annotations = $this->reader->getClassMetadata($reflection, $annotation);
+        } elseif ($reflection instanceof \ReflectionFunctionAbstract) {
+            $annotations = $this->reader->getFunctionMetadata($reflection, $annotation);
+        } elseif ($reflection instanceof \ReflectionProperty) {
+            $annotations = $this->reader->getPropertyMetadata($reflection, $annotation);
+        } elseif ($reflection instanceof \ReflectionClassConstant) {
+            $annotations = $this->reader->getConstantMetadata($reflection, $annotation);
+        } elseif ($reflection instanceof \ReflectionParameter) {
+            $annotations = $this->reader->getParameterMetadata($reflection, $annotation);
         }
 
         return $annotations instanceof \Generator ? \iterator_to_array($annotations) : $annotations;
