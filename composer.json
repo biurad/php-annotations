@@ -22,7 +22,8 @@
         "source": "https://github.com/biurad/php-annotations"
     },
     "require": {
-        "php": "^7.2 || ^8.0"
+        "php": "^7.2 || ^8.0",
+        "symfony/polyfill-php80": "^1.22"
     },
     "extra": {
         "branch-alias": {
