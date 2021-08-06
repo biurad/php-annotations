@@ -46,7 +46,7 @@ $annotation->resource(...); // Add a class/function string, class file, or direc
 $listeners = $annotation->load(); // Compile once, then load cached ...
 
 // To use a collector you implemented into your instance of `Biurad\Annotations\ListenerInterface`
-foreach ($$listeners as $collector) {
+foreach ($listeners as $collector) {
     // You can fetch the required $collector from here.
 }
 ```
