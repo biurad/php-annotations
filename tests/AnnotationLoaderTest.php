@@ -31,7 +31,7 @@ use Spiral\Attributes\AttributeReader;
 use Spiral\Attributes\Composite\MergeReader;
 
 /**
- * AnnotationLoaderTest
+ * AnnotationLoaderTest.
  */
 class AnnotationLoaderTest extends TestCase
 {
@@ -41,8 +41,16 @@ class AnnotationLoaderTest extends TestCase
 
         // doctrine/annotations ^1.0 compatibility.
         if (\method_exists(AnnotationRegistry::class, 'registerLoader')) {
-            AnnotationRegistry::registerLoader('\\class_exists');
+            AnnotationRegistry::registerLoader('class_exists');
         }
+    }
+
+    public function testEmptyAnnotations(): void
+    {
+        $annotation = new AnnotationLoader(new AnnotationReader());
+        $annotation->build(Fixtures\Sample::class);
+
+        $this->assertEmpty($annotation->load());
     }
 
     /**
@@ -52,7 +60,7 @@ class AnnotationLoaderTest extends TestCase
     public function testAnnotationListenerWithResource($loader): void
     {
         $annotation = new AnnotationLoader(new AnnotationReader(), $loader);
-        $result     = $names = [];
+        $result = $names = [];
 
         $annotation->listener(new Fixtures\SampleListener());
         $annotation->resource(...[
@@ -70,7 +78,7 @@ class AnnotationLoaderTest extends TestCase
             $collected->ksort();
 
             foreach ($collected as $name => $sample) {
-                $names[]  = $name;
+                $names[] = $name;
                 $result[] = $sample;
             }
         }
@@ -120,46 +128,37 @@ class AnnotationLoaderTest extends TestCase
             ['handler' => \ReflectionProperty::class, 'priority' => 0],
             ['handler' => \ReflectionClass::class, 'priority' => 0],
         ], $result);
+
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $annotation->load(Fixtures\Sample::class));
     }
 
     /**
+     * @requires PHP >= 8.0
+     *
      * @dataProvider provideAnnotationLoader
      * @runInSeparateProcess
      */
     public function testAnnotationLoaderWithAttribute($loader): void
     {
-        $annotation = new AnnotationLoader(new AttributeReader(), $loader);
-        $result     = [];
+        $resources = [
+            __DIR__ . '/Fixtures/Annotation/Attribute',
+            'Biurad\\Annotations\\Tests\\Fixtures\\Valid\\annotated_function',
+        ];
+        $annotation1 = new AnnotationLoader(new AttributeReader(), $loader);
+        $annotation2 = new AnnotationLoader(null, $loader);
 
-        $annotation->listener(new Fixtures\SampleListener());
-        $annotation->resource(__DIR__ . '/Fixtures/Annotation/Attribute');
+        $annotation1->listener(new Fixtures\SampleListener());
+        $annotation1->resource(...$resources);
+        $annotation2->listener(new Fixtures\SampleListener());
+        $annotation2->resource(...$resources);
 
-        $this->assertCount(1, $founds = $annotation->load());
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector1 = $annotation1->load(Fixtures\Sample::class));
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector2 = $annotation1->load(Fixtures\Sample::class));
 
-        /** @var Fixtures\SampleCollector $found */
-        foreach ($founds as $found) {
-            $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
+        ($collected1 = $collector1->getCollected())->ksort();
+        ($collected2 = $collector2->getCollected())->ksort();
 
-            $collected = $found->getCollected();
-            $collected->ksort();
-
-            foreach ($collected as $name => $sample) {
-                $result[$name] = $sample;
-            }
-        }
-
-        $this->assertEquals([
-            'attribute_specific_name'   => ['handler' => \ReflectionMethod::class, 'priority' => 0],
-            'attribute_specific_none'   => ['handler' => \ReflectionMethod::class, 'priority' => 14],
-            'attribute_property'        => ['handler' => \ReflectionProperty::class, 'priority' => 0],
-            'attribute_constant'        => ['handler' => \ReflectionClassConstant::class, 'priority' => 0],
-            'attribute_method_property' => ['handler' => \ReflectionParameter::class, 'priority' => 4],
-            'attribute_added_specific_name'   => ['handler' => \ReflectionMethod::class, 'priority' => 0],
-            'attribute_added_specific_none'   => ['handler' => \ReflectionMethod::class, 'priority' => 14],
-            'attribute_added_property'        => ['handler' => \ReflectionProperty::class, 'priority' => 0],
-            'attribute_added_constant'        => ['handler' => \ReflectionClassConstant::class, 'priority' => 0],
-            'attribute_added_method_property' => ['handler' => \ReflectionParameter::class, 'priority' => 4],
-        ], $result);
+        $this->assertEquals($collected1->getArrayCopy(), $collected2->getArrayCopy());
     }
 
     /**
@@ -168,25 +167,24 @@ class AnnotationLoaderTest extends TestCase
     public function testAnnotationLoaderWithFunction(): void
     {
         $annotation = new AnnotationLoader(new MergeReader([new AnnotationReader(), new AttributeReader()]));
-        $result     = $names = [];
 
-        $annotation->listener(new Fixtures\SampleListener());
         $annotation->resource('Biurad\\Annotations\\Tests\\Fixtures\\Valid\\annotated_function');
+        $collector = (new Fixtures\SampleListener())->load($annotation->load(Fixtures\Sample::class));
 
-        /** @var Fixtures\SampleCollector $found */
-        foreach ($annotation->load() as $found) {
-            $this->assertInstanceOf(Fixtures\SampleCollector::class, $found);
+        $collected = $collector->getCollected();
+        $collected->ksort();
 
-            $collected = $found->getCollected();
-            $collected->ksort();
+        $this->assertEquals(['attributed_function', 'function_property'], array_keys((array) $collected));
+    }
 
-            foreach ($collected as $name => $sample) {
-                $names[]  = $name;
-                $result[] = $sample;
-            }
-        }
-
-        $this->assertEquals(['attributed_function', 'function_property'], $names);
+    /**
+     * @requires PHP < 8.0
+     * @runInSeparateProcess
+     */
+    public function testSettingConstructorNullInPhp7(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        new AnnotationLoader();
     }
 
     public function provideAnnotationLoader(): array
@@ -229,17 +227,17 @@ class AnnotationLoaderTest extends TestCase
     protected function findClassByNode(string $file)
     {
         $parser = (new ParserFactory())->create(ParserFactory::PREFER_PHP7);
-        $ast = $parser->parse(file_get_contents($file));
+        $ast = $parser->parse(\file_get_contents($file));
         $traverser = new NodeTraverser();
 
         $traverser->addVisitor($class = new class () extends NodeVisitorAbstract {
             private $className = null;
 
-            public function enterNode(Node $node)
+            public function enterNode(Node $node): void
             {
                 if ($node instanceof Namespace_) {
                     // Clean out the function body
-                    $this->className = join('\\', $node->name->parts) . '\\';
+                    $this->className = \join('\\', $node->name->parts) . '\\';
                 } elseif ($node instanceof Class_) {
                     $this->className .= $node->name->name;
                 }
@@ -255,18 +253,18 @@ class AnnotationLoaderTest extends TestCase
         return $class->getClassName();
     }
 
-
     protected function findClassByToken(string $file)
     {
         $class = false;
         $namespace = false;
-        $tokens = token_get_all(file_get_contents($file));
+        $tokens = \token_get_all(\file_get_contents($file));
 
         if (1 === \count($tokens) && \T_INLINE_HTML === $tokens[0][0]) {
-            throw new \InvalidArgumentException(sprintf('The file "%s" does not contain PHP code. Did you forgot to add the "<?php" start tag at the beginning of the file?', $file));
+            throw new \InvalidArgumentException(\sprintf('The file "%s" does not contain PHP code. Did you forgot to add the "<?php" start tag at the beginning of the file?', $file));
         }
 
         $nsTokens = [\T_NS_SEPARATOR => true, \T_STRING => true];
+
         if (\defined('T_NAME_QUALIFIED')) {
             $nsTokens[\T_NAME_QUALIFIED] = true;
         }
@@ -284,6 +282,7 @@ class AnnotationLoaderTest extends TestCase
 
             if (true === $namespace && isset($nsTokens[$token[0]])) {
                 $namespace = $token[1];
+
                 while (isset($tokens[++$i][1], $nsTokens[$tokens[$i][0]])) {
                     $namespace .= $tokens[$i][1];
                 }
@@ -293,6 +292,7 @@ class AnnotationLoaderTest extends TestCase
             if (\T_CLASS === $token[0]) {
                 // Skip usage of ::class constant and anonymous classes
                 $skipClassToken = false;
+
                 for ($j = $i - 1; $j > 0; --$j) {
                     if (!isset($tokens[$j][1])) {
                         break;
@@ -300,8 +300,11 @@ class AnnotationLoaderTest extends TestCase
 
                     if (\T_DOUBLE_COLON === $tokens[$j][0] || \T_NEW === $tokens[$j][0]) {
                         $skipClassToken = true;
+
                         break;
-                    } elseif (!\in_array($tokens[$j][0], [\T_WHITESPACE, \T_DOC_COMMENT, \T_COMMENT])) {
+                    }
+
+                    if (!\in_array($tokens[$j][0], [\T_WHITESPACE, \T_DOC_COMMENT, \T_COMMENT])) {
                         break;
                     }
                 }

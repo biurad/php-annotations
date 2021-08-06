@@ -20,28 +20,32 @@ namespace Biurad\Annotations;
 interface LoaderInterface
 {
     /**
-     * Attache(s) the given resource(s) to the loader
+     * Attache(s) the given resource(s) to the loader.
      *
-     * @param string ...$resources type of class string, file, or directory
+     * @param string ...$resources type of class string, function name, file, or directory
      */
     public function resource(string ...$resources): void;
 
     /**
-     * Attache(s) the given listener(s) to the loader
+     * Attache(s) the given listener(s) to the loader.
      *
      * @param ListenerInterface ...$listeners
      */
     public function listener(ListenerInterface ...$listeners): void;
 
     /**
-     * Loads annotations from attached resources
+     * Loads annotations from attached resources.
      *
-     * @return iterable|mixed[]
+     * @param bool $stale If true rebuilding annotations/attributes is locked
+     *
+     * @return mixed
      */
-    public function load(): iterable;
+    public function load(string $annotationClass = null, bool $stale = true);
 
     /**
-     * This finds and build annotations once
+     * This finds and build annotations once.
+     *
+     * @param string|null ...$annotationClass
      */
-    public function build(): void;
+    public function build(?string ...$annotationClass): void;
 }

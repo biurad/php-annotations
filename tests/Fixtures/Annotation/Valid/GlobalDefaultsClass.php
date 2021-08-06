@@ -27,7 +27,7 @@ class GlobalDefaultsClass
     /**
      * @Sample("property")
      *
-     * @var null|string
+     * @var string|null
      */
     public $attribute;
 

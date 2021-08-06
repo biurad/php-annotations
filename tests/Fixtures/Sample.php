@@ -18,13 +18,13 @@ declare(strict_types=1);
 namespace Biurad\Annotations\Tests\Fixtures;
 
 /**
- *  Annotation class for @Listener().
+ * A sample Attribute/Annotation class.
  *
  * @Annotation
- * @Target({"CLASS", "METHOD", "FUNCTION", "PROPERTY"})
+ * @NamedArgumentConstructor
+ * @Target({ "ALL" })
  */
-
-#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_PROPERTY | \Attribute::TARGET_CLASS_CONSTANT | \Attribute::TARGET_PARAMETER)]
+#[\Attribute(\Attribute::TARGET_ALL | \Attribute::IS_REPEATABLE)]
 final class Sample
 {
     /** @var string */
@@ -36,36 +36,27 @@ final class Sample
     /**
      * @param @param array<string,mixed>|string $data
      * @param string                            $name
-     * @param int                               $priority
      */
-    public function __construct($data = null, string $name = null, int $priority = 0)
+    public function __construct($data = [], string $name = null, int $priority = 0)
     {
-        if (\is_array($data) && isset($data['value'])) {
-            $data['name'] = $data['value'];
-            unset($data['value']);
-        } elseif (\is_string($data)) {
-            $data = ['name' => $data];
+        if (\is_string($data)) {
+            $data = ['value' => $data];
         }
 
-        $this->name     = $data['name'] ?? $name;
+        $this->name = $data['value'] ?? $data['name'] ?? $name;
         $this->priority = $data['priority'] ?? $priority;
 
         if (empty($this->name) || !\is_string($this->name)) {
-            throw new \InvalidArgumentException(\sprintf(
-                '@Sample.name must %s.',
-                empty($this->event) ? 'be not an empty string' : 'contain only a string'
-            ));
+            throw new \InvalidArgumentException(\sprintf('@Sample.name must %s.', empty($this->name) ? 'be not an empty string' : 'contain only a string'));
         }
 
-        if (!\is_integer($this->priority)) {
+        if (!\is_int($this->priority)) {
             throw new \InvalidArgumentException('@Sample.priority must contain only an integer');
         }
     }
 
     /**
-     * Get the priority
-     *
-     * @return int
+     * Get the priority.
      */
     public function getPriority(): int
     {
@@ -73,9 +64,7 @@ final class Sample
     }
 
     /**
-     * Get the name
-     *
-     * @return string
+     * Get the name.
      */
     public function getName(): string
     {

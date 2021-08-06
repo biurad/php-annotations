@@ -23,7 +23,7 @@
     },
     "require": {
         "php": "^7.2 || ^8.0",
-        "spiral/attributes": "dev-master"
+        "symfony/polyfill-php80": "^1.22"
     },
     "extra": {
         "branch-alias": {
@@ -36,7 +36,8 @@
         "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-strict-rules": "^0.12",
         "phpunit/phpunit": "^8.5 || ^9.5",
-        "squizlabs/php_codesniffer": "^3.5",
+        "spiral/attributes": "dev-master",
+        "squizlabs/php_codesniffer": "^3.6",
         "vimeo/psalm": "^4.7"
     },
     "autoload": {
@@ -62,7 +63,8 @@
         ]
     },
     "suggest": {
-        "doctrine/annotations": "^1.8 for Doctrine metadata driver support"
+        "doctrine/annotations": "^1.8 for Doctrine metadata driver support",
+        "spiral/attributes": "For loading doctrine and/or PHP 8 attributes for PHP 7"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

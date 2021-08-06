@@ -22,21 +22,16 @@ class SampleCollector
     private $collected = [];
 
     /**
-     * @param string           $name
-     * @param int              $priority
      * @param Reflector|string $handler
      */
     public function add(string $name, int $priority, $handler): void
     {
         $this->collected[$name] = [
-            'handler'  => $handler instanceof \Reflector ? \get_class($handler) : $handler,
+            'handler' => $handler instanceof \Reflector ? \get_class($handler) : $handler,
             'priority' => $priority,
         ];
     }
 
-    /**
-     * @return \ArrayObject
-     */
     public function getCollected(): \ArrayObject
     {
         return new \ArrayObject($this->collected);
