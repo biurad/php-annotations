@@ -21,10 +21,10 @@
     </projectFiles>
 
     <issueHandlers>
-        <MethodSignatureMismatch>
+        <UndefinedClass>
             <errorLevel type="suppress">
-                <directory name="src/Locate"/>
+                <referencedClass name="ReflectionAttribute"/>
             </errorLevel>
-        </MethodSignatureMismatch>
+        </UndefinedClass>
     </issueHandlers>
 </psalm>
