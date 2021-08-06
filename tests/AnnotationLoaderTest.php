@@ -133,6 +133,8 @@ class AnnotationLoaderTest extends TestCase
     }
 
     /**
+     * @requires PHP >= 8.0
+     *
      * @dataProvider provideAnnotationLoader
      * @runInSeparateProcess
      */
@@ -176,16 +178,13 @@ class AnnotationLoaderTest extends TestCase
     }
 
     /**
+     * @requires PHP < 8.0
      * @runInSeparateProcess
      */
     public function testSettingConstructorNullInPhp7(): void
     {
-        if (PHP_VERSION_ID >= 80000) {
-            $this->markTestSkipped();
-        }
-
         $this->expectException(\RuntimeException::class);
-        $annotation = new AnnotationLoader();
+        new AnnotationLoader();
     }
 
     public function provideAnnotationLoader(): array
