@@ -99,7 +99,7 @@ class AnnotationLoader implements LoaderInterface
             }
         }
 
-        foreach ((array) $annotationClass as $annotation) {
+        foreach (\array_unique((array) $annotationClass) as $annotation) {
             $loadedAnnotation = \array_filter($annotations[$annotation] ?? []);
 
             if (isset($this->listeners[$annotation])) {
