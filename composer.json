@@ -31,10 +31,8 @@
         }
     },
     "require-dev": {
-        "composer/package-versions-deprecated": "^1.11",
         "doctrine/annotations": "^1.11",
-        "phpstan/phpstan": "^0.12",
-        "phpstan/phpstan-strict-rules": "^0.12",
+        "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^8.5 || ^9.5",
         "spiral/attributes": "dev-master",
         "squizlabs/php_codesniffer": "^3.6",
@@ -67,5 +65,10 @@
         "spiral/attributes": "For loading doctrine and/or PHP 8 attributes for PHP 7"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "composer/package-versions-deprecated": false
+        }
+    }
 }
