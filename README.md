@@ -51,7 +51,7 @@ foreach ($listeners as $collector) {
 }
 ```
 
-> **NB:** If you are on PHP 8 and wishes to use attributes only, please avoid using `spiral/attributes` package for best performance. Contributing why this library is not shipped with `spiral/attributes` package.
+> **NB:** If you are on PHP 8 and wishes to use attributes only, please avoid using `spiral/attributes` package for best performance contributing to why this library is not shipped with `spiral/attributes` package.
 
 ## 📓 Documentation
 
