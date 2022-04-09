@@ -2,7 +2,7 @@
 
 [![Latest Version](https://img.shields.io/packagist/v/biurad/annotations.svg?style=flat-square)](https://packagist.org/packages/biurad/annotations)
 [![Software License](https://img.shields.io/badge/License-BSD--3-brightgreen.svg?style=flat-square)](LICENSE)
-[![Workflow Status](https://img.shields.io/github/workflow/status/biurad/php-annotations/Tests?style=flat-square)](https://github.com/biurad/php-annotations/actions?query=workflow%3ATests)
+[![Workflow Status](https://img.shields.io/github/workflow/status/biurad/php-annotations/build?style=flat-square)](https://github.com/biurad/php-annotations/actions?query=workflow%3Abuild)
 [![Code Maintainability](https://img.shields.io/codeclimate/maintainability/biurad/php-annotations?style=flat-square)](https://codeclimate.com/github/biurad/php-annotations)
 [![Coverage Status](https://img.shields.io/codecov/c/github/biurad/php-annotations?style=flat-square)](https://codecov.io/gh/biurad/php-annotations)
 [![Quality Score](https://img.shields.io/scrutinizer/g/biurad/php-annotations.svg?style=flat-square)](https://scrutinizer-ci.com/g/biurad/php-annotations)
