@@ -1,11 +1,7 @@
-includes:
-    - vendor/phpstan/phpstan-strict-rules/rules.neon
-
 parameters:
     level: 2
     paths: [src]
     checkGenericClassInNonGenericObjectType: false
 
     ignoreErrors:
-        - "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
         - "#^Call to an undefined method Reflector\\:\\:getAttributes\\(\\).|Parameter \\$attribute of anonymous function has invalid typehint type ReflectionAttribute.|Call to method newInstance\\(\\) on an unknown class ReflectionAttribute.$#"
