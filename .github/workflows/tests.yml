@@ -3,9 +3,6 @@
 name: build
 on: [push, pull_request]
 
-#env:
-#  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-
 jobs:
   tests:
     strategy:
@@ -49,12 +46,19 @@ jobs:
         run: composer install --no-progress --optimize-autoloader
 
       - name: Run unit tests (PHPUnit)
-        run: |
-            vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
-            bash <(curl -s https://codecov.io/bash) -f coverage.clover
-        #    curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        #    chmod +x ./cc-test-reporter && ./cc-test-reporter before-build
-        #    if [ ${{ matrix.php-versions }} == 8.0 ]; then ./cc-test-reporter after-build --coverage-input-type clover; fi;
+        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
+
+      - name: "Upload coverage report to Codecov"
+        uses: codecov/codecov-action@v2
+        continue-on-error: true
+        with:
+          files: ./coverage.clover
+
+      - name: "Upload coverage report to CodeClimate"
+        uses: paambaati/codeclimate-action@v3
+        continue-on-error: true
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
       - name: Check coding standards (PHP_CodeSniffer)
         run: vendor/bin/phpcs
