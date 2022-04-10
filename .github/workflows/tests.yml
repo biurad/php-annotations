@@ -80,4 +80,4 @@ jobs:
         if: ${{ matrix.php-versions }} >= "7.4"
         run: |
           composer require phpbench/phpbench -W
-          vendor/bin/phpbench run --report=benchmark --revs 1000 -l dots
+          vendor/bin/phpbench run --report=default --revs 1000 -l none
