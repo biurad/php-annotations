@@ -55,7 +55,7 @@ jobs:
           files: ./coverage.clover
 
       - name: "Upload coverage report to CodeClimate"
-        uses: paambaati/codeclimate-action@v3
+        uses: paambaati/codeclimate-action@v3.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
