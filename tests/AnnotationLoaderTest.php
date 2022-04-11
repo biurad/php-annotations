@@ -48,9 +48,7 @@ class AnnotationLoaderTest extends TestCase
     public function testEmptyAnnotations(): void
     {
         $annotation = new AnnotationLoader(new AnnotationReader());
-        $annotation->build(Fixtures\Sample::class);
-
-        $this->assertEmpty($annotation->load());
+        $this->assertEmpty($annotation->load(Fixtures\Sample::class));
     }
 
     /**
@@ -62,13 +60,13 @@ class AnnotationLoaderTest extends TestCase
         $annotation = new AnnotationLoader(new AnnotationReader(), $loader);
         $result = $names = [];
 
-        $annotation->listener(new Fixtures\SampleListener());
+        $annotation->listener(new Fixtures\SampleListener(), 'test');
         $annotation->resource(...[
             __DIR__ . '/Fixtures/Annotation/Valid',
             'non-existing-file.php',
         ]);
 
-        $this->assertCount(1, $founds = $annotation->load());
+        $this->assertCount(1, $founds = [$annotation->load()]);
 
         /** @var Fixtures\SampleCollector $found */
         foreach ($founds as $found) {
@@ -129,7 +127,7 @@ class AnnotationLoaderTest extends TestCase
             ['handler' => \ReflectionClass::class, 'priority' => 0],
         ], $result);
 
-        $this->assertInstanceOf(Fixtures\SampleCollector::class, $annotation->load(Fixtures\Sample::class));
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $annotation->load('test'));
     }
 
     /**
@@ -140,6 +138,10 @@ class AnnotationLoaderTest extends TestCase
      */
     public function testAnnotationLoaderWithAttribute($loader): void
     {
+        if (null === $loader) {
+            $this->markTestSkipped('Composer loads tests fixtures classes by default.');
+        }
+
         $resources = [
             __DIR__ . '/Fixtures/Annotation/Attribute',
             'Biurad\\Annotations\\Tests\\Fixtures\\Valid\\annotated_function',
@@ -147,13 +149,13 @@ class AnnotationLoaderTest extends TestCase
         $annotation1 = new AnnotationLoader(new AttributeReader(), $loader);
         $annotation2 = new AnnotationLoader(null, $loader);
 
-        $annotation1->listener(new Fixtures\SampleListener());
+        $annotation1->listener(new Fixtures\SampleListener(), 'test1');
         $annotation1->resource(...$resources);
-        $annotation2->listener(new Fixtures\SampleListener());
+        $annotation2->listener(new Fixtures\SampleListener(), 'test2');
         $annotation2->resource(...$resources);
 
-        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector1 = $annotation1->load(Fixtures\Sample::class));
-        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector2 = $annotation1->load(Fixtures\Sample::class));
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector1 = $annotation1->load('test1'));
+        $this->assertInstanceOf(Fixtures\SampleCollector::class, $collector2 = $annotation2->load('test2'));
 
         ($collected1 = $collector1->getCollected())->ksort();
         ($collected2 = $collector2->getCollected())->ksort();
@@ -196,7 +198,7 @@ class AnnotationLoaderTest extends TestCase
         ];
     }
 
-    public function tokenClassLoader(array $files): array
+    public function tokenClassLoader(\Traversable $files): array
     {
         if (!\function_exists('token_get_all')) {
             $this->markTestSkipped('The Tokenizer extension is required for the annotation loader.');
@@ -210,7 +212,7 @@ class AnnotationLoaderTest extends TestCase
         return $classes;
     }
 
-    public function nodeClassLoader(array $files): array
+    public function nodeClassLoader(\Traversable $files): array
     {
         if (!\interface_exists(Node::class)) {
             $this->markTestSkipped('The PhpParser is required for the annotation loader.');

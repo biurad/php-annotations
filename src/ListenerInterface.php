@@ -17,19 +17,26 @@ declare(strict_types=1);
 
 namespace Biurad\Annotations;
 
+/**
+ * A listener class to load attributes/annotations.
+ *
+ * @author Divine Niiquaye Ibok <divineibok@gmail.com>
+ */
 interface ListenerInterface
 {
     /**
      * This method utilises found annotations and return collector.
      *
-     * @param Locate\Class_[]|Locate\Function_[] $annotations
+     * @param array<int,array<string,mixed>> $annotations
      *
      * @return mixed
      */
     public function load(array $annotations);
 
     /**
-     * The annotation class to find.
+     * The annotation/attribute classes to find.
+     *
+     * @return array<int,string>
      */
-    public function getAnnotation(): string;
+    public function getAnnotations(): array;
 }

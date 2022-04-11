@@ -1,15 +1,14 @@
-# Change Log
-All notable changes to this project will be documented in this file.
-Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
+CHANGELOG
+=========
 
-## [Unreleased][unreleased]
+1.0
+===
 
-### Added
-
-### Changed
-
-### Fixed
-
-### Removed
-
-[unreleased]: https://github.com/biurad/php-annotations/compare/v0.1.0...master
+* [BC BREAK] Renamed the getAnnotation listener method to getAnnotations
+* [BC BREAK] Added string list return type for the listener's getAnnotation method
+* [BC BREAK] Use array instead of parsing annotation/attribute into class objects
+* [BC BREAK] Changed the annotation's loader class listener method from variadic to add one at a time
+* [BC BREAK] Changed the annotation's loader class build method from public to protected
+* [BC BREAK] The annotation's loader load method no longer accepts null as a value
+* Added alias support listener support for easier loading of listener's annotation/attribute
+* Improved performance of loading annotation/attribute

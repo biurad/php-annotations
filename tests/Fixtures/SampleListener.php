@@ -18,9 +18,6 @@ declare(strict_types=1);
 namespace Biurad\Annotations\Tests\Fixtures;
 
 use Biurad\Annotations\ListenerInterface;
-use Biurad\Annotations\Locate\Annotation;
-use Biurad\Annotations\Locate\Class_;
-use Biurad\Annotations\Locate\Method;
 
 class SampleListener implements ListenerInterface
 {
@@ -35,9 +32,9 @@ class SampleListener implements ListenerInterface
     /**
      * {@inheritdoc}
      */
-    public function getAnnotation(): string
+    public function getAnnotations(): array
     {
-        return 'Biurad\Annotations\Tests\Fixtures\Sample';
+        return ['Biurad\Annotations\Tests\Fixtures\Sample'];
     }
 
     /**
@@ -46,32 +43,30 @@ class SampleListener implements ListenerInterface
     public function load(array $annotations): SampleCollector
     {
         foreach ($annotations as $annotation) {
-            if ($annotation instanceof Class_) {
-                $attributes = \array_merge($annotation->methods, $annotation->properties, $annotation->constants);
+            $reflector = $annotation['type'];
 
-                if ([] === $attributes) {
-                    $this->addSample(null, $annotation);
+            if ($reflector instanceof \ReflectionClass) {
+                $attributes = \array_merge($annotation['methods'], $annotation['properties'], $annotation['constants']);
 
-                    continue;
-                }
+                if (!empty($attributes)) {
+                    foreach ($attributes as $attribute) {
+                        $this->addSample($attribute['type'], $attribute['attributes'], $annotation['attributes']);
 
-                foreach ($attributes as $attribute) {
-                    $this->addSample($annotation->getAnnotation(), $attribute);
-
-                    if ($attribute instanceof Method) {
-                        foreach ($attribute->parameters as $parameter) {
-                            $this->addSample($annotation->getAnnotation(), $parameter);
+                        if (isset($attribute['parameters'])) {
+                            foreach ($attribute['parameters'] as $parameter) {
+                                $this->addSample($parameter['type'], $parameter['attributes']);
+                            }
                         }
                     }
+                    continue;
                 }
+                $this->addSample($reflector, $annotation['attributes']);
+            } elseif ($reflector instanceof \ReflectionFunction) {
+                $this->addSample($reflector, $annotation['attributes']);
 
-                continue;
-            }
-
-            $this->addSample(null, $annotation);
-
-            foreach ($annotation->parameters as $parameter) {
-                $this->addSample(null, $parameter);
+                foreach ($annotation['parameters'] as $parameter) {
+                    $this->addSample($parameter['type'], $parameter['attributes']);
+                }
             }
         }
 
@@ -79,29 +74,30 @@ class SampleListener implements ListenerInterface
     }
 
     /**
-     * @param Sample[]|Sample|null $attribute
+     * @param array<int,Sample>|Sample $attributes
      */
-    private function addSample($attribute, Annotation $listener): void
+    private function addSample(\Reflector $reflector, array $annotations, $attribute = []): void
     {
-        if (\is_array($attribute) && [] !== $attribute) {
+        if (\is_array($attribute) && !empty($attribute)) {
             foreach ($attribute as $annotation) {
-                $this->addSample($annotation, $listener);
+                $this->addSample($reflector, $annotations, $annotation);
             }
+        } else {
+            foreach ($annotations as $annotated) {
+                if (!$annotated instanceof Sample) {
+                    continue;
+                }
 
-            return;
-        }
+                $name = $annotated->getName();
+                $priority = $annotated->getPriority();
 
-        /** @var Sample $annotated */
-        foreach ($listener->getAnnotation() as $annotated) {
-            $name = $annotated->getName();
-            $priority = $annotated->getPriority();
+                if ($attribute instanceof Sample) {
+                    $name = $attribute->getName() . '_' . $name;
+                    $priority += $attribute->getPriority();
+                }
 
-            if ($attribute instanceof Sample) {
-                $name = $attribute->getName() . '_' . $name;
-                $priority += $attribute->getPriority();
+                $this->collector->add($name, $priority, $reflector);
             }
-
-            $this->collector->add($name, $priority, $listener->getReflection());
         }
     }
 }
