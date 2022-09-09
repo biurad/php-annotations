@@ -38,7 +38,7 @@ class AnnotationLoader
     /** @var string[] */
     private $resources = [];
 
-    /** @var callable(string[])|null */
+    /** @var callable(string[]) */
     private $classLoader;
 
     /**
@@ -51,7 +51,7 @@ class AnnotationLoader
         }
 
         $this->reader = $reader;
-        $this->classLoader = $classLoader;
+        $this->classLoader = $classLoader ?? [self::class, 'findClasses'];
     }
 
     /**
@@ -84,39 +84,30 @@ class AnnotationLoader
      *
      * @param string ...$listener the name of class name for registered lister
      *                            annotation/attribute class name or listener's aliased name
+     *
+     * @return mixed
      */
     public function load(string ...$listener)
     {
-        $loadedAnnotation = [];
+        $loaded = [];
 
-        if (empty($listener)) {
-            if (empty($this->loadedListeners)) {
-                foreach ($this->listeners as $name => $value) {
-                    $this->loadedListeners[$name] = $value->load($this->build(...$value->getAnnotations()));
-                }
-            }
+        foreach (($listener ?: $this->listeners) as $name => $value) {
+            if (\is_int($name)) {
+                $name = $this->aliases[$value] ?? $value;
 
-            $loadedAnnotation = $this->loadedListeners;
-        } else {
-            foreach ($listener as $name) {
-                $name = $this->aliases[$name] ?? $name;
-                $loaded = ($this->loadedListeners[$name] ?? $this->loadedAttributes[$name] ?? null);
-
-                if (null === $loaded) {
-                    $l = $this->listeners[$name] ?? null;
-
-                    if ($l instanceof ListenerInterface) {
-                        $this->loadedListeners[$name] = $l->load($this->build(...$l->getAnnotations()));
-                    }
-
-                    $loaded = $this->loadedListeners[$name] ?? ($this->loadedAttributes[$name] = $this->build($name));
+                if (!isset($this->listeners[$name])) {
+                    $loaded[$name] = $this->loadedAttributes[$name] ?? ($this->loadedAttributes[$name] = $this->build($name));
+                    continue;
                 }
 
-                $loadedAnnotation[$name] = $loaded;
+                if (!isset($this->loadedListeners[$name])) {
+                    $value = $this->listeners[$name];
+                }
             }
+            $loaded[$name] = $this->loadedListeners[$name] ?? $this->loadedListeners[$name] = $value->load($this->build(...$value->getAnnotations()));
         }
 
-        return 1 === \count($loadedAnnotation) ? \current($loadedAnnotation) : $loadedAnnotation;
+        return 1 === \count($loaded) ? \current($loaded) : $loaded;
     }
 
     /**
@@ -135,21 +126,14 @@ class AnnotationLoader
                 $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($resource, \FilesystemIterator::CURRENT_AS_PATHNAME));
                 $files = new \RegexIterator($iterator, '/\.php$/');
 
-                if (\iterator_count($files) > 0) {
-                    $values = ($this->classLoader ?? [$this, 'findClasses'])($files);
+                foreach (($this->classLoader)($files) as $class) {
+                    $classes = $this->fetchClassAnnotation($class, $annotationClass);
 
-                    foreach ($values as $class) {
-                        $classes = $this->fetchClassAnnotation($class, $annotationClass);
-
-                        if (!empty($classes)) {
-                            $annotations[] = $classes;
-                        }
+                    if (!empty($classes)) {
+                        $annotations[] = $classes;
                     }
                 }
-                continue;
-            }
-
-            if (\function_exists($resource)) {
+            } elseif (\function_exists($resource)) {
                 $values = $this->fetchFunctionAnnotation(new \ReflectionFunction($resource), $annotationClass);
             } elseif (\class_exists($resource)) {
                 $values = $this->fetchClassAnnotation($resource, $annotationClass);
@@ -233,20 +217,14 @@ class AnnotationLoader
                     $methods[] = $method;
                     ++$classRefCount;
                 }
-
-                continue;
-            }
-
-            if (empty($annotations = $this->getAnnotations($reflection, $annotationClass))) {
-                continue;
-            }
-
-            if ($reflection instanceof \ReflectionProperty) {
-                $properties[] = ['attributes' => $annotations, 'type' => $reflection];
-                ++$classRefCount;
-            } elseif ($reflection instanceof \ReflectionClassConstant) {
-                $constants[] = ['attributes' => $annotations, 'type' => $reflection];
-                ++$classRefCount;
+            } elseif (!empty($annotations = $this->getAnnotations($reflection, $annotationClass))) {
+                if ($reflection instanceof \ReflectionProperty) {
+                    $properties[] = ['attributes' => $annotations, 'type' => $reflection];
+                    ++$classRefCount;
+                } elseif ($reflection instanceof \ReflectionClassConstant) {
+                    $constants[] = ['attributes' => $annotations, 'type' => $reflection];
+                    ++$classRefCount;
+                }
             }
         }
 
