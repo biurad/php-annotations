@@ -31,7 +31,7 @@
         }
     },
     "require-dev": {
-        "doctrine/annotations": "^1.11",
+        "doctrine/annotations": "^1.11 || ^2.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^8.5 || ^9.5",
         "spiral/attributes": "^2.8",
