@@ -55,6 +55,14 @@ class AnnotationLoader
     }
 
     /**
+     * Returns the spiral attributes/annotations reader instance.
+     */
+    public function getReader(): ?ReaderInterface
+    {
+        return $this->reader;
+    }
+
+    /**
      * Attach a listener to the loader.
      */
     public function listener(ListenerInterface $listener, string $alias = null): void
