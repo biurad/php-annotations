@@ -1,74 +1,45 @@
 {
-    "name": "biurad/annotations",
-    "description": "A library that provides a Simple, Lazy, Fast & Lightweight Annotation for php classes",
-    "type": "library",
-    "keywords": ["biurad","biurad","php","annotations","phpdoc"],
-    "homepage": "https://www.biurad.com",
-    "license": "BSD-3-Clause",
-    "authors": [
-        {
-            "name": "Divine Niiquaye Ibok",
-            "email": "divineibok@gmail.com"
-        },
-        {
-            "name": "Biurad Lap Community",
-            "homepage": "https://biurad.com/projects/contributors"
-        }
-    ],
-    "support": {
-        "docs": "https://docs.biurad.com/php-annotations/",
-        "issues": "https://github.com/biurad/php-annotations/issues",
-        "rss": "https://github.com/biurad/php-annotations/releases.atom",
-        "source": "https://github.com/biurad/php-annotations"
+  "name": "biurad/annotations",
+  "description": "Library for managing all your PHP attributes/annotations with ease",
+  "keywords": ["biurad","biurad","php","annotations","phpdoc"],
+  "homepage": "https://biurad.com",
+  "license": "BSD-3-Clause",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Divine Niiquaye Ibok",
+      "email": "divineibok@gmail.com"
     },
-    "require": {
-        "php": "^7.2 || ^8.0",
-        "symfony/polyfill-php80": "^1.22"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.x-dev"
-        }
-    },
-    "require-dev": {
-        "doctrine/annotations": "^1.11",
-        "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^8.5 || ^9.5",
-        "spiral/attributes": "^2.8",
-        "squizlabs/php_codesniffer": "^3.6",
-        "vimeo/psalm": "^4.7"
-    },
-    "autoload": {
-        "psr-4": {
-            "Biurad\\Annotations\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Biurad\\Annotations\\Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "phpcs": "phpcs -q",
-        "phpstan": "phpstan analyse",
-        "psalm": "psalm --show-info=true",
-        "phpunit": "phpunit --no-coverage",
-        "test": [
-            "@phpcs",
-            "@phpstan",
-            "@psalm",
-            "@phpunit"
-        ]
-    },
-    "suggest": {
-        "doctrine/annotations": "^1.8 for Doctrine metadata driver support",
-        "spiral/attributes": "For loading doctrine and/or PHP 8 attributes for PHP 7"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "config": {
-        "allow-plugins": {
-            "composer/package-versions-deprecated": false
-        }
+    {
+      "name": "GitHub Contributors",
+      "homepage": "https://github.com/biurad/php-annotations/contributors"
     }
+  ],
+  "support": {
+    "docs": "https://docs.biurad.com/poakium/annotations"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^7.2 || ^8.0",
+    "symfony/polyfill-php80": "^1.22"
+  },
+  "require-dev": {
+    "doctrine/annotations": "^1.11",
+    "spiral/attributes": "^2.9 || ^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Biurad\\Annotations\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.x-dev"
+    }
+  },
+  "suggest": {
+    "doctrine/annotations": "^1.8 for Doctrine metadata driver support",
+    "spiral/attributes": "For loading doctrine and/or PHP 8 attributes for PHP 7"
+  }
 }
