@@ -1,0 +1,11 @@
+name: 🐛 Bug or Feature Report
+description: Report Bug Fix, RFC and ideas for new features and improvements 🙂
+labels: [invalid, stale]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for taking the time to fill out this bug report!
+
+        This repository is currently not accepting issues, kindly refer to
+        [Poakium](https://github.com/biurad/poakium) and create issue there.
